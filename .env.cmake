@@ -1,0 +1,6 @@
+set(GLAD_PATH "$ENV{HOME}/Libs/glad")
+set(GLM_PATH "$ENV{HOME}/Libs/glm")
+set(STB_PATH "$ENV{HOME}/Libs/stb")
+set(IMGUI_PATH "$ENV{HOME}/Libs/imgui")
+set(UTILS_PATH "$ENV{HOME}/Projects/utils")
+set(LEGIT_PROFILER_PATH "$ENV{HOME}/Libs/LegitProfiler")
