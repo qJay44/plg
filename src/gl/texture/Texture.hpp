@@ -7,8 +7,8 @@ class Texture {
 public:
   Texture() = default;
 
-  Texture(const fspath& path, const TextureDescriptor& desc = TextureDescriptor{});
-  Texture(const image2D& img, const TextureDescriptor& desc = TextureDescriptor{});
+  Texture(const fspath& path, const TextureDescriptor& desc);
+  Texture(const image2D& img, const TextureDescriptor& desc);
 
   Texture(const Texture& other);
 
@@ -19,6 +19,7 @@ public:
   void unbind() const;
   void clear();
 
+  const GLuint& getId() const;
   const GLenum& getTarget() const;
   const GLuint& getUnit() const;
   const std::string& getUniformName() const;
@@ -29,7 +30,7 @@ public:
 
 private:
   TextureDescriptor desc;
-  GLuint id;
+  GLuint id = 0;
 
 private:
   void create(const image2D& img);

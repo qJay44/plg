@@ -1,8 +1,7 @@
 #include "Texture.hpp"
+#include "utils/utils.hpp"
 
 #include <cassert>
-
-constexpr GLenum GL_STANDARD_CHANNELS[4] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
 
 Texture::Texture(const fspath& path, const TextureDescriptor& d) : desc(d) {
   create(image2D(path));
@@ -37,9 +36,11 @@ void Texture::unbind() const {
 }
 
 void Texture::clear() {
-  glDeleteTextures(1, &id);
+  if (id)
+    glDeleteTextures(1, &id);
 }
 
+const GLuint& Texture::getId() const { return id; }
 const GLenum& Texture::getTarget() const { return desc.target; }
 const GLuint& Texture::getUnit() const { return desc.unit; }
 const std::string& Texture::getUniformName() const { return desc.uniformName; }
@@ -56,8 +57,6 @@ void Texture::setUniformName(const std::string& name) {
 void Texture::create(const image2D& img) {
   switch (desc.target) {
     case GL_TEXTURE_2D: {
-      GLenum finalInternalFormat = desc.internalFormat ? desc.internalFormat : GL_STANDARD_CHANNELS[img.channels - 1];
-      GLint finalFormat = desc.format ? desc.format : GL_STANDARD_CHANNELS[img.channels - 1];
       desc.size = ivec2(img.width, img.height);
 
       glGenTextures(1, &id);
@@ -66,7 +65,7 @@ void Texture::create(const image2D& img) {
       glTexParameteri(desc.target, GL_TEXTURE_MAG_FILTER, desc.magFilter);
       glTexParameteri(desc.target, GL_TEXTURE_WRAP_S, desc.wrapS);
       glTexParameteri(desc.target, GL_TEXTURE_WRAP_T, desc.wrapT);
-      glTexImage2D(desc.target, 0, finalInternalFormat, img.width, img.height, 0, finalFormat, desc.type, img.pixels);
+      glTexImage2D(desc.target, 0, desc.internalFormat, img.width, img.height, 0, desc.format, desc.type, img.pixels);
 
       break;
     }

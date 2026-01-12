@@ -1,38 +1,39 @@
 #pragma once
 
 #include <algorithm>
-#include <cmath>
 
+#include "gl/Shader.hpp"
 #include "gl/texture/Texture.hpp"
 #include "gl/texture/image2D.hpp"
-#include "noise.hpp"
 
 struct MapGenerator {
-  static Texture gen(ivec2 size, float scale) {
-    float invScale = 1.f / std::max(scale, 0.0001f);
-    u8* pixels = new u8[size.x * size.y * 4];
+  static Texture tex;
 
-    for (int y = 0; y < size.y; y++)
-      for (int x = 0; x < size.x; x++) {
-        int yy = y << 2;
-        float p = noise::perlin({x * invScale, y * invScale});
-        pixels[yy + 0 + x * size.y * 4] = std::lerp(0, 255, p);
-        pixels[yy + 1 + x * size.y * 4] = std::lerp(0, 255, p);
-        pixels[yy + 2 + x * size.y * 4] = std::lerp(0, 255, p);
-        pixels[yy + 3 + x * size.y * 4] = std::lerp(0, 255, p);
-      }
+  static void gen(ivec2 size, float scale) {
+    static const image2D noiseImg("res/rgba-noise-medium.png");
+    static const Texture noiseTex(noiseImg, {"u_noisePermutationTex", {}, 0, GL_TEXTURE_2D, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, GL_NEAREST, GL_NEAREST});
+    static Shader noiseShader("noise2d.comp");
 
-    image2D img;
-    img.width = size.x;
-    img.height = size.y;
-    img.pixels = pixels;
+    float invScale = 1.f / std::max(scale, 0.01f);
 
-    Texture tex = Texture(img, {"u_diffuse0", size, 0, GL_TEXTURE_2D, GL_RGBA, GL_RGBA});
+    image2D mapImg;
+    mapImg.width = size.x;
+    mapImg.height = size.y;
+    mapImg.channels = 4;
 
-    delete[] pixels;
-    img.pixels = nullptr;
+    tex.clear();
+    tex = Texture(mapImg, {"u_diffuse0", size, 1, GL_TEXTURE_2D, GL_RGBA8});
 
-    return tex;
+    constexpr uvec2 localSize(16); // NOTE: Must match in the shader
+    const uvec2 numGroups = (uvec2(size) + localSize - 1u) / localSize;
+
+    noiseShader.setUniformTexture(noiseTex);
+    noiseShader.setUniform1f("u_invScale", invScale);
+    noiseTex.bind();
+    glBindImageTexture(1, tex.getId(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
+    glDispatchCompute(numGroups.x, numGroups.y, 1);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    noiseTex.unbind();
   }
 };
 

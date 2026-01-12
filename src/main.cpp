@@ -105,11 +105,9 @@ int main() {
 
   // ============================================================ //
 
-  Mesh plane = meshes::plane({}, {20.f, 10.f}, vec3(1.f), false);
-  Mesh axis = meshes::axis(50.f, true);
-  Texture noiseTex = MapGenerator::gen({50, 20}, 0.3f);
-
-  gui::noiseTex = &noiseTex;
+  Mesh plane = meshes::plane({}, {50.f, 50.f});
+  Mesh axis = meshes::axis(50.f);
+  MapGenerator::gen({INIT_NOISE_MAP_WIDTH, INIT_NOISE_MAP_HEIGHT}, INIT_NOISE_MAP_SCALE);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -149,9 +147,10 @@ int main() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    noiseTex.bind();
+    MapGenerator::tex.bind();
+    shaderMain.setUniformTexture(MapGenerator::tex);
     plane.draw(camera, shaderMain);
-    noiseTex.unbind();
+    MapGenerator::tex.unbind();
 
     if (global::drawGlobalAxis)
       axis.draw(camera, shaderV4Color);

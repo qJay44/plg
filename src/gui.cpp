@@ -9,7 +9,6 @@ using global::camera;
 static bool collapsed = true;
 
 std::string gui::performanceInfo = "Debug";
-Texture* gui::noiseTex = nullptr;
 
 void gui::toggle() { collapsed = !collapsed; }
 
@@ -46,19 +45,17 @@ void gui::draw() {
 
   // ================== Map Generator ================== //
 
-  if (!noiseTex) error("[gui] The noise texture is not linked to gui");
-
   if (TreeNode("Noise texture")) {
-    static ivec2 size{50, 20};
-    static float scale = 0.3f;
+    static ivec2 size{INIT_NOISE_MAP_WIDTH, INIT_NOISE_MAP_HEIGHT};
+    static float scale = INIT_NOISE_MAP_SCALE;
     bool upd = false;
 
     upd |= SliderInt("Width", &size.x, 1, 512);
     upd |= SliderInt("Height", &size.y, 1, 512);
-    upd |= SliderFloat("Scale", &scale, 0.01f, 100.f);
+    upd |= SliderFloat("Scale", &scale, 0.01f, 10.f);
 
     if (upd)
-      *noiseTex = MapGenerator::gen(size, scale);
+      MapGenerator::gen(size, scale);
 
     TreePop();
   }
@@ -67,6 +64,7 @@ void gui::draw() {
 
   if (TreeNode("Other")) {
     Checkbox("Show global axis", &global::drawGlobalAxis);
+    Checkbox("Wireframe mod", &global::drawWireframe);
 
     TreePop();
   }

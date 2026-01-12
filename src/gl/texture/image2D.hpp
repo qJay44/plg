@@ -7,7 +7,7 @@ struct image2D {
   image2D(const fspath& path, bool flipVertically = false);
   ~image2D();
 
-  u16 width, height, channels;
+  int width, height, channels;
   void* pixels = nullptr;
   std::string name;
 

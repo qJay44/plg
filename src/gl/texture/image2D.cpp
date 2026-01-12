@@ -31,17 +31,13 @@ image2D::~image2D() {
 void image2D::load(const fspath& path, bool flipVertically) {
   status::start("Loading", path.string());
 
-  int w, h, colorChannels;
   stbi_set_flip_vertically_on_load(flipVertically);
-  pixels = stbi_load(path.string().c_str(), &w, &h, &colorChannels, 0);
+  pixels = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
   if (!pixels) {
     status::end(false);
     error(std::format("stb can't load the image: {}", path.string()));
   }
 
-  width = static_cast<u16>(w);
-  height = static_cast<u16>(h);
-  channels = static_cast<u16>(colorChannels);
   name = path.string();
   stbiLoad = true;
 

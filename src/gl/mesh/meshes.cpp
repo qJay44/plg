@@ -6,10 +6,10 @@ namespace meshes {
 
 Mesh plane(vec3 pos, vec2 size, vec3 color, bool clearable) {
   std::vector<Vertex4> vertices{
-    {{-0.1f, -0.1f, 0.f}, color, {0.f, 0.f}, {-1.f, 0.f, 0.f}},
-    {{-0.1f,  0.1f, 0.f}, color, {0.f, 1.f}, {-1.f, 0.f, 0.f}},
-    {{ 0.1f,  0.1f, 0.f}, color, {1.f, 1.f}, {-1.f, 0.f, 0.f}},
-    {{ 0.1f, -0.1f, 0.f}, color, {1.f, 0.f}, {-1.f, 0.f, 0.f}},
+    {{-1.f, -1.f, 0.f}, color, {0.f, 0.f}, {1.f, 0.f, 0.f}},
+    {{-1.f,  1.f, 0.f}, color, {0.f, 1.f}, {1.f, 0.f, 0.f}},
+    {{ 1.f,  1.f, 0.f}, color, {1.f, 1.f}, {1.f, 0.f, 0.f}},
+    {{ 1.f, -1.f, 0.f}, color, {1.f, 0.f}, {1.f, 0.f, 0.f}},
   };
 
   std::vector<GLuint> indices{
