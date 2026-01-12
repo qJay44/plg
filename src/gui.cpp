@@ -1,6 +1,7 @@
 #include "gui.hpp"
 
 #include "MapGenerator.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "imgui.h"
 
 using namespace ImGui;
@@ -8,7 +9,8 @@ using global::camera;
 
 static bool collapsed = true;
 
-std::string gui::performanceInfo = "Debug";
+u16 gui::fps = 1;
+MapGenerator* gui::mg = nullptr;
 
 void gui::toggle() { collapsed = !collapsed; }
 
@@ -20,7 +22,7 @@ void gui::draw() {
 
   Begin("Settings");
 
-  ImGui::Text("%s", performanceInfo.c_str());
+  ImGui::Text("FPS: %d / %f.5 ms", fps, global::dt);
 
   // ================== Camera ========================= //
 
@@ -45,17 +47,27 @@ void gui::draw() {
 
   // ================== Map Generator ================== //
 
+  if (!mg) error("[gui] The MapGenerator is not linked to gui");
+
   if (TreeNode("Noise texture")) {
-    static ivec2 size{INIT_NOISE_MAP_WIDTH, INIT_NOISE_MAP_HEIGHT};
-    static float scale = INIT_NOISE_MAP_SCALE;
+    static float imgScale = 0.5f;
     bool upd = false;
 
-    upd |= SliderInt("Width", &size.x, 1, 512);
-    upd |= SliderInt("Height", &size.y, 1, 512);
-    upd |= SliderFloat("Scale", &scale, 0.01f, 10.f);
+    upd |= SliderInt("Width", &mg->size.x, 1, 512);
+    upd |= SliderInt("Height", &mg->size.y, 1, 512);
+    upd |= SliderFloat("Scale", &mg->scale, 0.01f, 100.f);
+    upd |= SliderFloat("Persistance", &mg->persistance, 0.01f, 1.f);
+    upd |= SliderFloat("Lacunarity", &mg->lacunarity, 1.f, 100.f);
+    upd |= SliderInt("Octaves", &mg->octaves, 1, 10);
+    upd |= DragInt("Seed", &mg->seed);
+    upd |= DragFloat2("Offset", glm::value_ptr(mg->offset), 0.25f);
 
     if (upd)
-      MapGenerator::gen(size, scale);
+      mg->gen();
+
+    Spacing();
+    SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
+    Image(mg->tex.getId(), vec2(mg->size) * imgScale);
 
     TreePop();
   }

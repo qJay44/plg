@@ -52,6 +52,7 @@ GLint Shader::getUniformLoc(const std::string& name) const {
 void Shader::use() const { glUseProgram(program); }
 
 void Shader::setUniform1f(const GLint& loc, const GLfloat& n)            const { use(); glUniform1f(loc, n); }
+void Shader::setUniform2f(const GLint& loc, const vec2& v)               const { use(); glUniform2f(loc, v.x, v.y); }
 void Shader::setUniform3f(const GLint& loc, const vec3& v)               const { use(); glUniform3f(loc, v.x, v.y, v.z); }
 void Shader::setUniform4f(const GLint& loc, const vec4& v)               const { use(); glUniform4f(loc, v.x, v.y, v.z, v.w); }
 void Shader::setUniform1i(const GLint& loc, const GLint& v)              const { use(); glUniform1i(loc, v); }
@@ -60,6 +61,7 @@ void Shader::setUniform2i(const GLint& loc, const ivec2& v)              const {
 void Shader::setUniformMatrix4f(const GLint& loc, const mat4& m)         const { use(); glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(m)); }
 
 void Shader::setUniform1f(const std::string& name, const GLfloat& n)            const { setUniform1f(getUniformLoc(name), n); }
+void Shader::setUniform2f(const std::string& name, const vec2& v)               const { setUniform2f(getUniformLoc(name), v); }
 void Shader::setUniform3f(const std::string& name, const vec3& v)               const { setUniform3f(getUniformLoc(name), v); }
 void Shader::setUniform4f(const std::string& name, const vec4& v)               const { setUniform4f(getUniformLoc(name), v); }
 void Shader::setUniform1i(const std::string& name, const GLint& v)              const { setUniform1i(getUniformLoc(name), v); }

@@ -22,8 +22,6 @@ image2D::image2D(const fspath& path, bool flipVertically) { load(path, flipVerti
 image2D::~image2D() {
   if (stbiLoad)
     stbi_image_free(pixels);
-  else if(tifInt16Load)
-    delete[] (s16*)pixels;
   else if (pixels)
     error("image2D is not nullptr");
 }

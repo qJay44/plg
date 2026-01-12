@@ -21,6 +21,7 @@ public:
   void clear();
 
   void setUniform1f(const GLint& loc, const GLfloat& n)            const;
+  void setUniform2f(const GLint& loc, const vec2& v)               const;
   void setUniform3f(const GLint& loc, const vec3& v)               const;
   void setUniform4f(const GLint& loc, const vec4& v)               const;
   void setUniform1i(const GLint& loc, const GLint& v)              const;
@@ -29,6 +30,7 @@ public:
   void setUniformMatrix4f(const GLint& loc, const mat4& m)         const;
 
   void setUniform1f(const std::string& name, const GLfloat& n)            const;
+  void setUniform2f(const std::string& name, const vec2& v)               const;
   void setUniform3f(const std::string& name, const vec3& v)               const;
   void setUniform4f(const std::string& name, const vec4& v)               const;
   void setUniform1i(const std::string& name, const GLint& v)              const;

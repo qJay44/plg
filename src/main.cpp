@@ -110,8 +110,10 @@ int main() {
   Mesh plane = meshes::plane({}, {50.f, 50.f});
   Mesh axis = meshes::axis(50.f);
 
-  MapGenerator::gen({INIT_NOISE_MAP_WIDTH, INIT_NOISE_MAP_HEIGHT}, INIT_NOISE_MAP_SCALE);
-  shaderMain.setUniformTexture(MapGenerator::tex);
+  MapGenerator mg;
+  shaderMain.setUniformTexture(mg.tex);
+
+  gui::mg = &mg;
 
   glEnable(GL_DEPTH_TEST);
 
@@ -121,7 +123,7 @@ int main() {
     static double prevTime = titleTimer;
     static double currTime = prevTime;
 
-    constexpr double fpsLimit = 1. / 90.;
+    constexpr float fpsLimit = 1.f / 120.f;
     currTime = glfwGetTime();
     global::dt = currTime - prevTime;
 
@@ -143,17 +145,16 @@ int main() {
 
     // Update window title every 0.3 seconds
     if (currTime - titleTimer >= 0.3) {
-      u16 fps = static_cast<u16>(1.f / global::dt);
-      gui::performanceInfo = std::format("FPS: {} / {:.5f} ms", fps, global::dt).c_str();
+      gui::fps = static_cast<u16>(1.f / global::dt);
       titleTimer = currTime;
     }
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    MapGenerator::tex.bind();
+    mg.tex.bind();
     plane.draw(camera, shaderMain);
-    MapGenerator::tex.unbind();
+    mg.tex.unbind();
 
     if (global::drawGlobalAxis)
       axis.draw(camera, shaderV4Color);

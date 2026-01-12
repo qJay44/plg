@@ -15,5 +15,4 @@ struct image2D {
 
 private:
   bool stbiLoad = false;
-  bool tifInt16Load = false;
 };
