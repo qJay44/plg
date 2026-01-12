@@ -1,4 +1,6 @@
 #include <cassert>
+#include <cstdlib>
+
 #ifdef _WIN32
   #include <direct.h>
   #define CHDIR(p) _chdir(p);
@@ -107,7 +109,9 @@ int main() {
 
   Mesh plane = meshes::plane({}, {50.f, 50.f});
   Mesh axis = meshes::axis(50.f);
+
   MapGenerator::gen({INIT_NOISE_MAP_WIDTH, INIT_NOISE_MAP_HEIGHT}, INIT_NOISE_MAP_SCALE);
+  shaderMain.setUniformTexture(MapGenerator::tex);
 
   glEnable(GL_DEPTH_TEST);
 
@@ -148,7 +152,6 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     MapGenerator::tex.bind();
-    shaderMain.setUniformTexture(MapGenerator::tex);
     plane.draw(camera, shaderMain);
     MapGenerator::tex.unbind();
 

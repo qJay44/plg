@@ -4,16 +4,19 @@ layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 layout(rgba8, binding = 1) writeonly uniform image2D imageWrite;
 
-uniform sampler2D u_noisePermutationTex;
 uniform float u_invScale;
 
 float fade(float t) {
   return t*t*t*(t*(t*6.f - 15.f) + 10.f);
 }
 
+float rand(vec2 p) {
+  return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 vec2 grad(vec2 p) {
-  vec2 rg = texture(u_noisePermutationTex, p / vec2(textureSize(u_noisePermutationTex, 0))).rg;
-  return normalize(rg * 2.f - 1.f);
+  float angle = 3.141592654f * 2.f * rand(p);
+  return vec2(sin(angle), cos(angle));
 }
 
 // Returns value in [-1, 1]
@@ -43,9 +46,10 @@ float perlin(vec2 p) {
 }
 
 void main() {
-  ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
-  float n = perlin(texCoord) * 0.5f + 0.5f;
+  vec2 texCoord = vec2(gl_GlobalInvocationID.xy);
+  float n = perlin(texCoord);
+  n = n * 0.5f + 0.5f;
 
-  imageStore(imageWrite, texCoord, vec4(vec3(n), 1.f));
+  imageStore(imageWrite, ivec2(texCoord), vec4(vec3(n), 1.f));
 }
 
