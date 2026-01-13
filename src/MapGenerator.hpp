@@ -1,21 +1,40 @@
 #pragma once
 
 #include <algorithm>
+#include <format>
 
 #include "gl/Shader.hpp"
 #include "gl/texture/Texture.hpp"
 #include "gl/texture/image2D.hpp"
 
 struct MapGenerator {
-  Texture tex;
+  Texture noiseTex;
+  Texture terrainTex;
 
   ivec2 size{512, 512};
-  float scale = 27.f;
+  float scale = 25.f;
   float persistance = 0.5f;
   float lacunarity = 2.f;
   int octaves = 4;
   int seed = 1;
   vec2 offset{};
+
+  struct Region {
+    const char* uniformFmt;
+    float height;
+    vec3 color;
+  };
+
+  std::array<Region, 8> regions {
+    Region{"u_waterDeep{}"   , 0.30f, {0.11f, 0.27f, 0.63f}},
+    Region{"u_waterShallow{}", 0.40f, {0.22f, 0.38f, 0.74f}},
+    Region{"u_sand{}"        , 0.45f, {0.81f, 0.85f, 0.48f}},
+    Region{"u_grass{}"       , 0.55f, {0.35f, 0.65f, 0.10f}},
+    Region{"u_grass2{}"      , 0.60f, {0.25f, 0.55f, 0.09f}},
+    Region{"u_rock{}"        , 0.70f, {0.35f, 0.25f, 0.24f}},
+    Region{"u_rock2{}"       , 0.90f, {0.28f, 0.22f, 0.21f}},
+    Region{"u_snow{}"        , 1.00f, {1.00f, 1.00f, 1.00f}},
+  };
 
   MapGenerator() {
     gen();
@@ -23,23 +42,30 @@ struct MapGenerator {
 
   void gen() {
     static Shader noiseShader("noise2d.comp");
+    static Shader terrainShader("terrain.comp");
 
     image2D mapImg;
     mapImg.width = size.x;
     mapImg.height = size.y;
-    mapImg.channels = 3;
 
     TextureDescriptor desc;
     desc.uniformName = "u_noiseTex";
     desc.size = size;
-    desc.unit = 1;
+    desc.unit = 0;
     desc.target = GL_TEXTURE_2D;
     desc.internalFormat = GL_RGBA8;
     desc.minFilter = GL_NEAREST;
     desc.magFilter = GL_NEAREST;
+    desc.wrapS = GL_CLAMP_TO_EDGE;
+    desc.wrapT = GL_CLAMP_TO_EDGE;
 
-    tex.clear();
-    tex = Texture(mapImg, desc);
+    noiseTex.clear();
+    noiseTex = Texture(mapImg, desc);
+
+    desc.uniformName = "u_terrainTex";
+    desc.unit = 1;
+    terrainTex.clear();
+    terrainTex = Texture(mapImg, desc);
 
     constexpr uvec2 localSize(16); // NOTE: Must match in the shader
     const uvec2 numGroups = (uvec2(size) + localSize - 1u) / localSize;
@@ -51,7 +77,17 @@ struct MapGenerator {
     noiseShader.setUniform1i("u_seed", seed);
     noiseShader.setUniform2f("u_offset", offset);
 
-    glBindImageTexture(1, tex.getId(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
+    glBindImageTexture(0, noiseTex.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+    glDispatchCompute(numGroups.x, numGroups.y, 1);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+    for (const Region& r : regions) {
+      terrainShader.setUniform1f(std::vformat(r.uniformFmt, std::make_format_args("Height")), r.height);
+      terrainShader.setUniform3f(std::vformat(r.uniformFmt, std::make_format_args("Color")), r.color);
+    }
+
+    glBindImageTexture(0, noiseTex.getId(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_RGBA8);
+    glBindImageTexture(1, terrainTex.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
     glDispatchCompute(numGroups.x, numGroups.y, 1);
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
   }

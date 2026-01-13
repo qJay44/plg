@@ -111,7 +111,7 @@ int main() {
   Mesh axis = meshes::axis(50.f);
 
   MapGenerator mg;
-  shaderMain.setUniformTexture(mg.tex);
+  shaderMain.setUniformTexture(mg.terrainTex);
 
   gui::mg = &mg;
 
@@ -152,9 +152,9 @@ int main() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    mg.tex.bind();
+    mg.terrainTex.bind();
     plane.draw(camera, shaderMain);
-    mg.tex.unbind();
+    mg.terrainTex.unbind();
 
     if (global::drawGlobalAxis)
       axis.draw(camera, shaderV4Color);

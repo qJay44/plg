@@ -3,6 +3,7 @@
 #include "MapGenerator.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "imgui.h"
+#include <string>
 
 using namespace ImGui;
 using global::camera;
@@ -45,32 +46,60 @@ void gui::draw() {
     TreePop();
   }
 
-  // ================== Map Generator ================== //
+  // ================== Noise texture ================== //
 
   if (!mg) error("[gui] The MapGenerator is not linked to gui");
 
+  bool regenTex = false;
+
   if (TreeNode("Noise texture")) {
     static float imgScale = 0.5f;
-    bool upd = false;
+    static bool sq = false;
 
-    upd |= SliderInt("Width", &mg->size.x, 1, 512);
-    upd |= SliderInt("Height", &mg->size.y, 1, 512);
-    upd |= SliderFloat("Scale", &mg->scale, 0.01f, 100.f);
-    upd |= SliderFloat("Persistance", &mg->persistance, 0.01f, 1.f);
-    upd |= SliderFloat("Lacunarity", &mg->lacunarity, 1.f, 100.f);
-    upd |= SliderInt("Octaves", &mg->octaves, 1, 10);
-    upd |= DragInt("Seed", &mg->seed);
-    upd |= DragFloat2("Offset", glm::value_ptr(mg->offset), 0.25f);
+    regenTex |= Checkbox("Width = Height", &sq);
 
-    if (upd)
-      mg->gen();
+    if (SliderInt("Width", &mg->size.x, 1, 512)) {
+      if (sq) mg->size.y = mg->size.x;
+      regenTex = true;
+    }
+
+    if (SliderInt("Height", &mg->size.y, 1, 512)) {
+      if (sq) mg->size.x = mg->size.y;
+      regenTex = true;
+    }
+
+    regenTex |= SliderFloat("Scale", &mg->scale, 0.01f, 100.f);
+    regenTex |= SliderFloat("Persistance", &mg->persistance, 0.01f, 1.f);
+    regenTex |= SliderFloat("Lacunarity", &mg->lacunarity, 1.f, 100.f);
+    regenTex |= SliderInt("Octaves", &mg->octaves, 1, 10);
+    regenTex |= DragInt("Seed", &mg->seed, 0.1f);
+    regenTex |= DragFloat2("Offset", glm::value_ptr(mg->offset), 0.1f);
 
     Spacing();
     SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
-    Image(mg->tex.getId(), vec2(mg->size) * imgScale);
+    Image(mg->noiseTex.getId(), vec2(mg->size) * imgScale);
 
     TreePop();
   }
+
+  // ================== Terrain texture ================ //
+
+  if (TreeNode("Terrain texture")) {
+    for (size_t i = 0; i < mg->regions.size(); i++) {
+      std::string name = mg->regions[i].uniformFmt;
+      name.pop_back();
+      name.pop_back();
+      name = name.substr(2);
+
+      regenTex |= SliderFloat((name + " height").c_str(), &mg->regions[i].height, 0.f, 1.f);
+      regenTex |= ColorEdit3((name + " color").c_str(), glm::value_ptr(mg->regions[i].color));
+    }
+
+    TreePop();
+  }
+
+  if (regenTex)
+    mg->gen();
 
   // ================== Other ========================== //
 

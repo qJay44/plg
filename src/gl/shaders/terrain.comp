@@ -1,0 +1,43 @@
+#version 460 core
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(rgba8, binding = 0) readonly  uniform image2D imageRead;
+layout(rgba8, binding = 1) writeonly uniform image2D imageWrite;
+
+uniform float u_waterDeepHeight;
+uniform float u_waterShallowHeight;
+uniform float u_sandHeight;
+uniform float u_grassHeight;
+uniform float u_grass2Height;
+uniform float u_rockHeight;
+uniform float u_rock2Height;
+uniform float u_snowHeight;
+
+uniform vec3 u_waterDeepColor;
+uniform vec3 u_waterShallowColor;
+uniform vec3 u_sandColor;
+uniform vec3 u_grassColor;
+uniform vec3 u_grass2Color;
+uniform vec3 u_rockColor;
+uniform vec3 u_rock2Color;
+uniform vec3 u_snowColor;
+
+void main() {
+  const ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
+  float height = imageLoad(imageRead, texCoord).r;
+  vec3 col;
+
+  if      (height < u_waterDeepHeight)    col = u_waterDeepColor;
+  else if (height < u_waterShallowHeight) col = u_waterShallowColor;
+  else if (height < u_sandHeight)         col = u_sandColor;
+  else if (height < u_grassHeight)        col = u_grassColor;
+  else if (height < u_grass2Height)       col = u_grass2Color;
+  else if (height < u_rockHeight)         col = u_rockColor;
+  else if (height < u_rock2Height)        col = u_rock2Color;
+  else                                    col = u_snowColor;
+
+  imageStore(imageWrite, texCoord, vec4(col, 1.f));
+}
+
+
