@@ -50,30 +50,30 @@ void gui::draw() {
 
   if (!mg) error("[gui] The MapGenerator is not linked to gui");
 
-  bool regenTex = false;
+  bool reGenTex = false;
 
   if (TreeNode("Noise texture")) {
     static float imgScale = 0.5f;
     static bool sq = false;
 
-    regenTex |= Checkbox("Width = Height", &sq);
+    reGenTex |= Checkbox("Width = Height", &sq);
 
     if (SliderInt("Width", &mg->size.x, 1, 512)) {
       if (sq) mg->size.y = mg->size.x;
-      regenTex = true;
+      reGenTex = true;
     }
 
     if (SliderInt("Height", &mg->size.y, 1, 512)) {
       if (sq) mg->size.x = mg->size.y;
-      regenTex = true;
+      reGenTex = true;
     }
 
-    regenTex |= SliderFloat("Scale", &mg->scale, 0.01f, 100.f);
-    regenTex |= SliderFloat("Persistance", &mg->persistance, 0.01f, 1.f);
-    regenTex |= SliderFloat("Lacunarity", &mg->lacunarity, 1.f, 100.f);
-    regenTex |= SliderInt("Octaves", &mg->octaves, 1, 10);
-    regenTex |= DragInt("Seed", &mg->seed, 0.1f);
-    regenTex |= DragFloat2("Offset", glm::value_ptr(mg->offset), 0.1f);
+    reGenTex |= SliderFloat("Scale", &mg->scale, 0.01f, 100.f);
+    reGenTex |= SliderFloat("Persistance", &mg->persistance, 0.01f, 1.f);
+    reGenTex |= SliderFloat("Lacunarity", &mg->lacunarity, 1.f, 100.f);
+    reGenTex |= SliderInt("Octaves", &mg->octaves, 1, 10);
+    reGenTex |= DragInt("Seed", &mg->seed, 0.1f);
+    reGenTex |= DragFloat2("Offset", glm::value_ptr(mg->offset), 0.1f);
 
     Spacing();
     SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
@@ -85,20 +85,23 @@ void gui::draw() {
   // ================== Terrain texture ================ //
 
   if (TreeNode("Terrain texture")) {
+    SliderInt("TESC divisions", &mg->tescDiv, 1, 500);
+    SliderFloat("Scale", &mg->terrainScale, 0.1f, 100.f);
+
     for (size_t i = 0; i < mg->regions.size(); i++) {
       std::string name = mg->regions[i].uniformFmt;
       name.pop_back();
       name.pop_back();
       name = name.substr(2);
 
-      regenTex |= SliderFloat((name + " height").c_str(), &mg->regions[i].height, 0.f, 1.f);
-      regenTex |= ColorEdit3((name + " color").c_str(), glm::value_ptr(mg->regions[i].color));
+      reGenTex |= SliderFloat((name + " height").c_str(), &mg->regions[i].height, 0.f, 1.f);
+      reGenTex |= ColorEdit3((name + " color").c_str(), glm::value_ptr(mg->regions[i].color));
     }
 
     TreePop();
   }
 
-  if (regenTex)
+  if (reGenTex)
     mg->gen();
 
   // ================== Other ========================== //

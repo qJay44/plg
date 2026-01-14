@@ -11,13 +11,16 @@ struct MapGenerator {
   Texture noiseTex;
   Texture terrainTex;
 
-  ivec2 size{512, 512};
+  ivec2 size{128, 128};
   float scale = 25.f;
   float persistance = 0.5f;
   float lacunarity = 2.f;
   int octaves = 4;
   int seed = 1;
   vec2 offset{};
+
+  int tescDiv = 64;
+  float terrainScale = 20.f;
 
   struct Region {
     const char* uniformFmt;

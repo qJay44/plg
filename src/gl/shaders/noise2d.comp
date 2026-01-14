@@ -52,18 +52,21 @@ void main() {
   const ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
   const ivec2 halfSize = imageSize(imageWrite) / 2;
 
+  const float noiseMax = u_octaves * u_persistance;
+  const float noiseMin = -noiseMax;
+
   float amplitude = 1.f;
   float frequency = 1.f;
   float n = 0.f;
 
   for (int i = 0; i < u_octaves; i++) {
     vec2 sampleCoord = vec2(texCoord - halfSize) * u_invScale * frequency + u_offset;
-    n += perlin(sampleCoord) * amplitude; // NOTE: n can go beyond -1 or 1
+    n += perlin(sampleCoord) * amplitude;
     amplitude *= u_persistance;
     frequency *= u_lacunarity;
   }
 
-  n = n * 0.5f + 0.5f;
+  n = smoothstep(noiseMin, noiseMax, n); // NOTE: Probably wrong
 
   imageStore(imageWrite, texCoord, vec4(vec3(n), 1.f));
 }

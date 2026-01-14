@@ -1,3 +1,4 @@
+#include "glm/gtc/constants.hpp"
 #include <cassert>
 #include <cstdlib>
 
@@ -61,8 +62,9 @@ int main() {
 
   // Globals
   window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
-  camera = new Camera({23.f, 10.f, 41.f}, {-0.56f, -0.23f, -0.77f}, 100.f);
+  camera = new Camera({64.f, 81.6f, 94.f}, {-0.42f, -0.61f, -0.63f}, 100.f);
   camera->setFarPlane(300.f);
+  camera->setSpeedDefault(50.f);
 
   assert(window);
   assert(camera);
@@ -96,8 +98,9 @@ int main() {
   // ===== Shaders ============================================== //
 
   Shader::setDirectoryLocation("gl/shaders");
+  glPatchParameteri(GL_PATCH_VERTICES, 4);
 
-  Shader shaderMain("main.vert", "main.frag");
+  Shader shaderMain("main.vert", "main.frag", "main.tesc", "main.tese");
   Shader shaderV4Color("v4_color.vert", "v4_color.frag");
 
   // ===== Inputs Handler ======================================= //
@@ -107,7 +110,9 @@ int main() {
 
   // ============================================================ //
 
-  Mesh plane = meshes::plane({}, {50.f, 50.f});
+  Mesh plane = meshes::plane({}, {50.f, 50.f}, vec3(1.f), GL_PATCHES);
+  plane.rotate(glm::half_pi<float>(), global::right);
+
   Mesh axis = meshes::axis(50.f);
 
   MapGenerator mg;
@@ -152,8 +157,13 @@ int main() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    shaderMain.setUniform1i("u_div", mg.tescDiv);
+    shaderMain.setUniform1f("u_terrainScale", mg.terrainScale);
+
     mg.terrainTex.bind();
+    mg.noiseTex.bind();
     plane.draw(camera, shaderMain);
+    mg.noiseTex.bind();
     mg.terrainTex.unbind();
 
     if (global::drawGlobalAxis)

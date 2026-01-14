@@ -52,6 +52,7 @@ add_executable(${PROJECT_NAME}
   ${SOURCES})
 
 find_package(glfw3 REQUIRED)
+find_package(OpenCL REQUIRED)
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 target_compile_options(${PROJECT_NAME} PRIVATE -isystem ${LEGIT_PROFILER_PATH}/include)
@@ -60,7 +61,6 @@ target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/pch.h
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${GLAD_PATH}/include
-  # ${GLFW_PATH}/include
   ${GLFW_INCLUDE_DIRS}
   ${GLM_PATH}/include
   ${STB_PATH}/include
@@ -72,11 +72,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_directories(${PROJECT_NAME} PUBLIC
   ${GLM_PATH}/bin
-  # ${GLFW_PATH}/lib-mingw-w64
-  # ${GLFW_LIBRARIES}
   ${IMGUI_PATH}/build
   ${GLAD_PATH}/build
 )
 
-target_link_libraries(${PROJECT_NAME} GLFW_IMGUI.so GLAD.so glfw)
+target_link_libraries(${PROJECT_NAME} GLFW_IMGUI.so GLAD.so glfw OpenCL::OpenCL)
 
