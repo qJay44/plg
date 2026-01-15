@@ -1,4 +1,3 @@
-#include "glm/gtc/constants.hpp"
 #include <cassert>
 #include <cstdlib>
 
@@ -62,8 +61,8 @@ int main() {
 
   // Globals
   window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
-  camera = new Camera({64.f, 81.6f, 94.f}, {-0.42f, -0.61f, -0.63f}, 100.f);
-  camera->setFarPlane(300.f);
+  camera = new Camera({1031.f, 467.6f, 597.f}, {-0.73f, -0.42f, -0.44f}, 100.f);
+  camera->setFarPlane(3000.f);
   camera->setSpeedDefault(50.f);
 
   assert(window);
@@ -110,10 +109,7 @@ int main() {
 
   // ============================================================ //
 
-  Mesh plane = meshes::plane({}, {50.f, 50.f}, vec3(1.f), GL_PATCHES);
-  plane.rotate(glm::half_pi<float>(), global::right);
-
-  Mesh axis = meshes::axis(50.f);
+  Mesh axis = meshes::axis(500000.f);
 
   MapGenerator mg;
   shaderMain.setUniformTexture(mg.terrainTex);
@@ -158,13 +154,8 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shaderMain.setUniform1i("u_div", mg.tescDiv);
-    shaderMain.setUniform1f("u_terrainScale", mg.terrainScale);
-
-    mg.terrainTex.bind();
-    mg.noiseTex.bind();
-    plane.draw(camera, shaderMain);
-    mg.noiseTex.bind();
-    mg.terrainTex.unbind();
+    shaderMain.setUniform1f("u_heightMultiplier", mg.heightMultiplier);
+    mg.draw(camera, shaderMain);
 
     if (global::drawGlobalAxis)
       axis.draw(camera, shaderV4Color);

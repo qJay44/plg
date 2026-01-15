@@ -27,9 +27,9 @@ void gui::draw() {
 
   // ================== Camera ========================= //
 
-  if (!camera) error("[gui] The camera is not linked to gui");
+  if (CollapsingHeader("Camera")) {
+    if (!camera) error("[gui] The camera is not linked to gui");
 
-  if (TreeNode("Camera")) {
     SliderFloat("Near##2",  &camera->nearPlane, 0.01f, 1.f);
     SliderFloat("Far##2",   &camera->farPlane,  10.f , 1000.f);
     SliderFloat("Speed##2", &camera->speed,     1.f  , 50.f);
@@ -42,8 +42,6 @@ void gui::draw() {
     Spacing();
     TextColored(vec4(camera->orientation * 0.5f + 0.5f, 1.f), "Orientation");
     Text("%.5f, %.5f, %.5f", camera->orientation.x, camera->orientation.y, camera->orientation.z);
-
-    TreePop();
   }
 
   // ================== Noise texture ================== //
@@ -52,23 +50,23 @@ void gui::draw() {
 
   bool reGenTex = false;
 
-  if (TreeNode("Noise texture")) {
+  if (CollapsingHeader("Noise texture")) {
     static float imgScale = 0.5f;
-    static bool sq = false;
+    static bool sq = true;
 
     reGenTex |= Checkbox("Width = Height", &sq);
 
-    if (SliderInt("Width", &mg->size.x, 1, 512)) {
+    if (SliderInt("Width", &mg->size.x, 1, 4096)) {
       if (sq) mg->size.y = mg->size.x;
       reGenTex = true;
     }
 
-    if (SliderInt("Height", &mg->size.y, 1, 512)) {
+    if (SliderInt("Height", &mg->size.y, 1, 4096)) {
       if (sq) mg->size.x = mg->size.y;
       reGenTex = true;
     }
 
-    reGenTex |= SliderFloat("Scale", &mg->scale, 0.01f, 100.f);
+    reGenTex |= SliderFloat("Scale", &mg->scale, 0.01f, 1000.f);
     reGenTex |= SliderFloat("Persistance", &mg->persistance, 0.01f, 1.f);
     reGenTex |= SliderFloat("Lacunarity", &mg->lacunarity, 1.f, 100.f);
     reGenTex |= SliderInt("Octaves", &mg->octaves, 1, 10);
@@ -78,27 +76,30 @@ void gui::draw() {
     Spacing();
     SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
     Image(mg->noiseTex.getId(), vec2(mg->size) * imgScale);
-
-    TreePop();
   }
 
-  // ================== Terrain texture ================ //
+  // ================== Terrain ======================== //
 
-  if (TreeNode("Terrain texture")) {
-    SliderInt("TESC divisions", &mg->tescDiv, 1, 500);
-    SliderFloat("Scale", &mg->terrainScale, 0.1f, 100.f);
+  if (CollapsingHeader("Terrain")) {
+    SliderFloat("TESC divisions", &mg->tescDiv, 1.f, 1024.f);
+    SliderFloat("Height multiplier", &mg->heightMultiplier, 0.1f, 20.f);
 
-    for (size_t i = 0; i < mg->regions.size(); i++) {
-      std::string name = mg->regions[i].uniformFmt;
-      name.pop_back();
-      name.pop_back();
-      name = name.substr(2);
+    if (SliderFloat("Plane scale", &mg->planeScale, 0.1f, 1000.f))
+      mg->plane.setScale({mg->planeScale, 1.f, mg->planeScale});
 
-      reGenTex |= SliderFloat((name + " height").c_str(), &mg->regions[i].height, 0.f, 1.f);
-      reGenTex |= ColorEdit3((name + " color").c_str(), glm::value_ptr(mg->regions[i].color));
+    if (TreeNode("Regions")) {
+      for (size_t i = 0; i < mg->regions.size(); i++) {
+        std::string name = mg->regions[i].uniformFmt;
+        name.pop_back();
+        name.pop_back();
+        name = name.substr(2);
+
+        reGenTex |= SliderFloat((name + " height").c_str(), &mg->regions[i].height, 0.f, 1.f);
+        reGenTex |= ColorEdit3((name + " color").c_str(), glm::value_ptr(mg->regions[i].color));
+      }
+
+      TreePop();
     }
-
-    TreePop();
   }
 
   if (reGenTex)
@@ -106,11 +107,9 @@ void gui::draw() {
 
   // ================== Other ========================== //
 
-  if (TreeNode("Other")) {
+  if (CollapsingHeader("Other")) {
     Checkbox("Show global axis", &global::drawGlobalAxis);
     Checkbox("Wireframe mod", &global::drawWireframe);
-
-    TreePop();
   }
 
   End();

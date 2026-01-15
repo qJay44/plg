@@ -6,8 +6,7 @@ in vec2 uvsCoord[];
 out vec2 texCoord;
 
 uniform mat4 u_cam;
-uniform mat4 u_model;
-uniform float u_terrainScale;
+uniform float u_heightMultiplier;
 uniform sampler2D u_noiseTex;
 
 void main() {
@@ -32,8 +31,8 @@ void main() {
   vec4 rightPos = pos1 + v * (pos2 - pos1);
   vec4 pos = leftPos + u * (rightPos - leftPos);
 
-  pos = u_model * pos;
-  pos.y += texture(u_noiseTex, texCoord).r * u_terrainScale;
+  float height = pow(2, (max(texture(u_noiseTex, texCoord).r, 0.4f) - 0.4f) * u_heightMultiplier) - 1.f;
+  pos.y += height;
 
   gl_Position = u_cam * pos;
 }

@@ -52,7 +52,7 @@ void main() {
   const ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
   const ivec2 halfSize = imageSize(imageWrite) / 2;
 
-  const float noiseMax = u_octaves * u_persistance;
+  const float noiseMax = u_octaves * u_persistance - 1.23f;
   const float noiseMin = -noiseMax;
 
   float amplitude = 1.f;

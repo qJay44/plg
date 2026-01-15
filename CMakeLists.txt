@@ -52,7 +52,6 @@ add_executable(${PROJECT_NAME}
   ${SOURCES})
 
 find_package(glfw3 REQUIRED)
-find_package(OpenCL REQUIRED)
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 target_compile_options(${PROJECT_NAME} PRIVATE -isystem ${LEGIT_PROFILER_PATH}/include)
@@ -76,5 +75,5 @@ target_link_directories(${PROJECT_NAME} PUBLIC
   ${GLAD_PATH}/build
 )
 
-target_link_libraries(${PROJECT_NAME} GLFW_IMGUI.so GLAD.so glfw OpenCL::OpenCL)
+target_link_libraries(${PROJECT_NAME} GLFW_IMGUI.so GLAD.so glfw)
 

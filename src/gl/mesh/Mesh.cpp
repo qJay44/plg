@@ -1,14 +1,11 @@
 #include "Mesh.hpp"
 
-#include "glm/ext/matrix_transform.hpp"
-
-Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable)
-  : vertices(vertices),
-    indices(indices),
+Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
+  : count(indices.size()),
     mode(mode),
-    clearable(clearable),
+    autoClear(autoClear),
     vao(VAO(1)),
-    vbo(VBO(1, vertices.data(), sizeof(Vertex4) * vertices.size())),
+    vbo(VBO(1, vertices.data(), sizeof(vertices[0]) * vertices.size())),
     ebo(1, indices.data(), sizeof(GLuint) * indices.size())
 {
   vao.bind();
@@ -16,7 +13,7 @@ Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indi
   ebo.bind();
 
   size_t typeSize = sizeof(float);
-  GLsizei stride = static_cast<GLsizei>((3 + 3 + 2 + 3) * typeSize);
+  GLsizei stride = sizeof(vertices[0]);
 
   vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
   vao.linkAttrib(1, 3, GL_FLOAT, stride, (void*)(3 * typeSize));
@@ -28,33 +25,44 @@ Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indi
   EBO::unbind();
 }
 
+Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
+  : count(indices.size()),
+    mode(mode),
+    autoClear(autoClear),
+    vao(VAO(1)),
+    vbo(VBO(1, vertices.data(), sizeof(vertices[0]) * vertices.size())),
+    ebo(1, indices.data(), sizeof(GLuint) * indices.size())
+{
+  vao.bind();
+  vbo.bind();
+  ebo.bind();
+
+  size_t typeSize = sizeof(float);
+  GLsizei stride = sizeof(vertices[0]);
+
+  vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
+  vao.linkAttrib(1, 2, GL_FLOAT, stride, (void*)(3 * typeSize));
+
+  VAO::unbind();
+  VBO::unbind();
+  EBO::unbind();
+}
+
 Mesh::~Mesh() {
-  if (clearable)
+  if (autoClear)
     clear();
+};
+
+void Mesh::clear() {
+  if (vao.size) vao.clear();
+  if (vbo.size) vbo.clear();
+  if (ebo.size) ebo.clear();
 }
-
-const mat4& Mesh::getTranslation() const { return translation; }
-const mat4& Mesh::getRotation()    const { return rotation;    }
-const mat4& Mesh::getScale()       const { return scaleMat;    }
-
-mat4 Mesh::getModel() const {
-  return translation * rotation * scaleMat;
-}
-
-u32 Mesh::getIndicesSize()  const { return indices.size();  }
-
-void Mesh::translate(const vec3& v) { translation = glm::translate(translation, v); }
-
-void Mesh::rotate(const float& angle, const vec3& axis) { rotation = glm::rotate(rotation, angle, axis);}
-void Mesh::rotate(const glm::quat& q) { rotation = glm::mat4_cast(q) * rotation; };
-
-void Mesh::scale(const float& s)    { scaleMat = glm::scale(scaleMat, vec3(s)); }
-void Mesh::scale(const vec2& s)     { scaleMat = glm::scale(scaleMat, vec3(s, 1.f)); }
 
 void Mesh::draw(const Camera* camera, const Shader& shader, bool forceNoWireframe) const {
   vao.bind();
 
-  mat4 model = translation * rotation * scaleMat;
+  mat4 model = transMat * rotMat * scaleMat;
 
   shader.setUniform1f("u_camNear", camera->getNearPlane());
   shader.setUniform1f("u_camFar", camera->getFarPlane());
@@ -70,16 +78,10 @@ void Mesh::draw(const Camera* camera, const Shader& shader, bool forceNoWirefram
   if (global::drawWireframe & !forceNoWireframe)
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  glDrawElements(mode, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
+  glDrawElements(mode, count, GL_UNSIGNED_INT, 0);
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   vao.unbind();
-}
-
-void Mesh::clear() {
-  if (vao.size) vao.clear();
-  if (vbo.size) vbo.clear();
-  if (ebo.size) ebo.clear();
 }
 

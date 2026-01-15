@@ -5,7 +5,7 @@
 
 namespace meshes {
 
-Mesh plane(vec3 pos, vec2 size, vec3 color, GLenum mode, bool clearable) {
+Mesh plane(vec3 color, GLenum mode, bool clearable) {
   std::vector<Vertex4> vertices{
     {{-1.f, -1.f, 0.f}, color, {0.f, 0.f}, {1.f, 0.f, 0.f}},
     {{-1.f,  1.f, 0.f}, color, {0.f, 1.f}, {1.f, 0.f, 0.f}},
@@ -36,11 +36,67 @@ Mesh plane(vec3 pos, vec2 size, vec3 color, GLenum mode, bool clearable) {
       error("[meshes::plane] Unhandled mode [{}]", mode);
   }
 
-  Mesh m = Mesh(vertices, indices, mode, clearable);
-  m.translate(pos);
-  m.scale(size);
+  return Mesh(vertices, indices, mode, clearable);
+}
 
-  return m;
+Mesh plane(size_t resolution, GLenum mode, bool clearable) {
+  size_t indicesPerQuad = 0;
+  if      (mode == GL_TRIANGLES) indicesPerQuad = 6;
+  else if (mode == GL_PATCHES)   indicesPerQuad = 4;
+  else error("[meshes::plane] Unexpected mode [{}]", mode);
+
+  std::vector<VertexPT> vertices(resolution * resolution);
+  std::vector<GLuint> indices((resolution - 1) * (resolution - 1) * indicesPerQuad);
+  constexpr vec3 up{0.f, 1.f, 0.f};
+
+  vec3 axisA = vec3(up.y, up.z, up.x);
+  vec3 axisB = cross(up, axisA);
+  size_t triIndex = 0;
+
+  for (size_t y = 0; y < resolution; y++) {
+    float percentY = y / (resolution - 1.f);
+    vec3 pY = (percentY - 0.5f) * 2.f * axisB;
+
+    for (size_t x = 0; x < resolution; x++) {
+      size_t idx = x + y * resolution;
+      float percentX = x / (resolution - 1.f);
+      vec3 pX = (percentX - 0.5f) * 2.f * axisA;
+
+      VertexPT& vert = vertices[idx];
+      vert.position = up + pX + pY;
+      vert.texture = {percentX, percentY};
+
+      switch (mode) {
+        case GL_TRIANGLES: {
+          if (x != resolution - 1 && y != resolution - 1) {
+            indices[triIndex + 0] = idx + resolution;     // 2       0 -------- 1
+            indices[triIndex + 1] = idx;                  // 0       |          |
+            indices[triIndex + 2] = idx + 1;              // 1       |          |
+            //                                                       |          |
+            indices[triIndex + 3] = idx + 1;              // 1       |          |
+            indices[triIndex + 4] = idx + resolution + 1; // 3       |          |
+            indices[triIndex + 5] = idx + resolution;     // 2       2 -------- 3
+
+            triIndex += 6;
+          }
+          break;
+        }
+        case GL_PATCHES: {
+          if (x != resolution - 1 && y != resolution - 1) {
+            indices[triIndex + 0] = idx;                  // 0
+            indices[triIndex + 1] = idx + 1;              // 1
+            indices[triIndex + 2] = idx + resolution + 1; // 3
+            indices[triIndex + 3] = idx + resolution;     // 2
+
+            triIndex += 4;
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  return Mesh(vertices, indices, mode, clearable);
 }
 
 Mesh axis(float size, bool clearable) {

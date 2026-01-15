@@ -30,7 +30,7 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
       break;
     case GLFW_KEY_2:
       if (action == GLFW_PRESS && !global::guiFocused)
-        global::drawNormals = !global::drawNormals;
+        global::drawGlobalAxis = !global::drawGlobalAxis;
       break;
   }
 }
