@@ -63,6 +63,16 @@ void MapGenerator::gen() {
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
+void MapGenerator::update() {
+  vec3 camPos = global::camera->getPosition();
+  gen();
+  offset.x = camPos.x;
+  offset.y = -camPos.z;
+
+  camPos.y = 0.f;
+  plane.setTrans(camPos);
+}
+
 void MapGenerator::draw(const Camera* camera, const Shader& shader, bool forceNoWireframe) const {
   terrainTex.bind();
   noiseTex.bind();

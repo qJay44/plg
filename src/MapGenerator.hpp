@@ -41,6 +41,7 @@ struct MapGenerator {
   MapGenerator(vec3 pos = vec3(0.f));
 
   void gen();
+  void update();
   void draw(const Camera* camera, const Shader& shader, bool forceNoWireframe = false) const;
 };
 

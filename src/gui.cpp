@@ -32,7 +32,7 @@ void gui::draw() {
 
     SliderFloat("Near##2",  &camera->nearPlane, 0.01f, 1.f);
     SliderFloat("Far##2",   &camera->farPlane,  10.f , 1000.f);
-    SliderFloat("Speed##2", &camera->speed,     1.f  , 50.f);
+    SliderFloat("Speed##2", &camera->speed,     1.f  , 1000.f);
     SliderFloat("FOV##2",   &camera->fov,       45.f , 179.f);
 
     Spacing();

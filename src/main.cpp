@@ -61,9 +61,9 @@ int main() {
 
   // Globals
   window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
-  camera = new Camera({1031.f, 467.6f, 597.f}, {-0.73f, -0.42f, -0.44f}, 100.f);
+  camera = new Camera({1031.f, 267.6f, 597.f}, {-0.73f, -0.42f, -0.44f}, 100.f);
   camera->setFarPlane(3000.f);
-  camera->setSpeedDefault(50.f);
+  camera->setSpeedDefault(10.f);
 
   assert(window);
   assert(camera);
@@ -121,7 +121,7 @@ int main() {
   // Render loop
   while (!glfwWindowShouldClose(window)) {
     static double titleTimer = glfwGetTime();
-    static double prevTime = titleTimer;
+    static double prevTime = titleTimer + 1e-4;
     static double currTime = prevTime;
 
     constexpr float fpsLimit = 1.f / 120.f;
@@ -152,6 +152,8 @@ int main() {
 
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    mg.update();
 
     shaderMain.setUniform1i("u_div", mg.tescDiv);
     shaderMain.setUniform1f("u_heightMultiplier", mg.heightMultiplier);

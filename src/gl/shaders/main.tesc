@@ -7,12 +7,7 @@ out vec2 uvsCoord[];
 
 uniform int u_div;
 uniform vec3 u_camPos;
-
-float calcTessLevel(float d) {
-  if (d < 100.f) return u_div;
-  if (d < 500.f) return u_div * 0.5f;
-  return u_div * 0.1f;
-}
+uniform float u_camFar;
 
 void main() {
   gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
@@ -24,7 +19,8 @@ void main() {
   vec3 p3 = gl_in[3].gl_Position.xyz;
 
   vec3 pos = (p0 + p1 + p2 + p3) / 4.f;
-  float tessLvl = calcTessLevel(distance(pos, u_camPos));
+  float dist = distance(pos, u_camPos);
+  float tessLvl = u_div * (1.f - smoothstep(0.f, u_camFar, dist));
 
   gl_TessLevelOuter[0] = tessLvl;
   gl_TessLevelOuter[1] = tessLvl;

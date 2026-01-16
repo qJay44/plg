@@ -13,6 +13,8 @@ public:
   void scale(const float& s);
   void scale(const vec2& s);
 
+  void setTrans(vec3 pos);
+
   void setScale(float s);
   void setScale(vec3 s);
 
