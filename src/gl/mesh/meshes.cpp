@@ -1,7 +1,9 @@
 #include "meshes.hpp"
-#include "utils/utils.hpp"
 
 #include <vector>
+
+#include "utils/utils.hpp"
+#include "../../global.hpp"
 
 namespace meshes {
 

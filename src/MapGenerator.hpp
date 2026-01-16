@@ -8,8 +8,12 @@ struct MapGenerator {
   Mesh plane = meshes::plane(20, GL_PATCHES);
   Texture noiseTex;
   Texture terrainTex;
+  Texture falloffTex;
 
-  ivec2 size{128, 128};
+  float falloffA = 3.f;
+  float falloffB = 2.2f;
+
+  ivec2 size{512};
   float scale = 25.f;
   float persistance = 0.5f;
   float lacunarity = 2.f;

@@ -1,5 +1,7 @@
 #include "Mesh.hpp"
 
+#include "../../global.hpp"
+
 Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
   : count(indices.size()),
     mode(mode),

@@ -7,7 +7,7 @@ out vec2 texCoord;
 
 uniform mat4 u_cam;
 uniform float u_heightMultiplier;
-uniform sampler2D u_noiseTex;
+uniform sampler2D u_terrainTex;
 
 void main() {
   float u = gl_TessCoord.x;
@@ -31,7 +31,8 @@ void main() {
   vec4 rightPos = pos1 + v * (pos2 - pos1);
   vec4 pos = leftPos + u * (rightPos - leftPos);
 
-  float height = pow(2, (max(texture(u_noiseTex, texCoord).r, 0.4f) - 0.4f) * u_heightMultiplier) - 1.f;
+  float height = texture(u_terrainTex, texCoord).a;
+  height = pow(2, (max(height, 0.4f) - 0.4f) * u_heightMultiplier) - 1.f;
   pos.y += height;
 
   gl_Position = u_cam * pos;

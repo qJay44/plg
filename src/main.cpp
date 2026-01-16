@@ -20,6 +20,7 @@
 #include "MapGenerator.hpp"
 #include "gui.hpp"
 #include "utils/clrp.hpp"
+#include "global.hpp"
 
 void GLAPIENTRY MessageCallback(
   GLenum source,
@@ -61,7 +62,7 @@ int main() {
 
   // Globals
   window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
-  camera = new Camera({1031.f, 267.6f, 597.f}, {-0.73f, -0.42f, -0.44f}, 100.f);
+  camera = new Camera({1031.f, 167.6f, 597.f}, {-0.73f, -0.42f, -0.44f}, 100.f);
   camera->setFarPlane(3000.f);
   camera->setSpeedDefault(10.f);
 
@@ -174,6 +175,8 @@ int main() {
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
   glfwTerminate();
+
+  delete camera;
 
   return 0;
 }

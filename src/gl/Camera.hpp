@@ -6,6 +6,7 @@ public:
   Camera(Camera&) = delete;
   Camera(Camera&&) = delete;
   Camera(vec3 pos, vec3 orientation, double sensitivity);
+  virtual ~Camera() = default;
 
   const float& getNearPlane()     const;
   const float& getFarPlane()      const;

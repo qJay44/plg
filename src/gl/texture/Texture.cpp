@@ -44,7 +44,7 @@ const GLuint& Texture::getId() const { return id; }
 const GLenum& Texture::getTarget() const { return desc.target; }
 const GLuint& Texture::getUnit() const { return desc.unit; }
 const std::string& Texture::getUniformName() const { return desc.uniformName; }
-const ivec2& Texture::getSize() const { return desc.size; }
+// const ivec2& Texture::getSize() const { return desc.size; }
 
 void Texture::setUnit(GLuint unit) {
   this->desc.unit = unit;
@@ -57,8 +57,6 @@ void Texture::setUniformName(const std::string& name) {
 void Texture::create(const image2D& img) {
   switch (desc.target) {
     case GL_TEXTURE_2D: {
-      desc.size = ivec2(img.width, img.height);
-
       glGenTextures(1, &id);
       bind();
       glTexParameteri(desc.target, GL_TEXTURE_MIN_FILTER, desc.minFilter);

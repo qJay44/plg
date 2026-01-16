@@ -1,0 +1,21 @@
+#version 460 core
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(r8, binding = 0) writeonly uniform image2D imageWrite;
+
+uniform float a;
+uniform float b;
+
+void main() {
+  const ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
+  const ivec2 halfSize = imageSize(imageWrite) / 2;
+
+  vec2 d = abs(texCoord - halfSize);
+  float x = max(d.x, d.y) / halfSize.x; // NOTE: Will look weird if halfSize.x != halfSize.y
+  float xa = pow(x, a);
+  float falloff = xa / (xa + pow(b - b * x, a));
+
+  imageStore(imageWrite, texCoord, vec4(vec3(falloff), 1.f));
+}
+

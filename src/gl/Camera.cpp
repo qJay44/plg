@@ -6,6 +6,7 @@
 #include "glm/gtx/rotate_vector.hpp"
 #include "glm/gtx/vector_angle.hpp"
 #include "glm/trigonometric.hpp"
+#include "../global.hpp"
 
 Camera::Camera(vec3 pos, vec3 orientation, double sensitivity)
   : position(pos),
@@ -41,7 +42,7 @@ void Camera::update() {
 
   calcView();
 
-  float aspectRatio = static_cast<float>(winSize.x) / winSize.y;
+  float aspectRatio = winSize.x / winSize.y;
   mat4 proj = glm::perspective(glm::radians(fov), aspectRatio, nearPlane, farPlane);
 
   mat = proj * view;

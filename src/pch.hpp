@@ -30,7 +30,6 @@ using glm::mat4;
 #include "utils/types.hpp"
 
 #include "defines.hpp"
-#include "global.hpp"
 
 #define IM_VEC2_CLASS_EXTRA                                             \
   constexpr ImVec2(const vec2& f) : x(f.x), y(f.y) {}                   \

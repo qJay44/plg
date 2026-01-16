@@ -23,7 +23,7 @@ public:
   const GLenum& getTarget() const;
   const GLuint& getUnit() const;
   const std::string& getUniformName() const;
-  const ivec2& getSize() const;
+  // const ivec2& getSize() const;
 
   void setUnit(GLuint unit);
   void setUniformName(const std::string& name);

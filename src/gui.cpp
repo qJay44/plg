@@ -1,13 +1,17 @@
 #include "gui.hpp"
 
+#include <string>
+
 #include "MapGenerator.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "global.hpp"
+
 #include "imgui.h"
-#include <string>
 
 using namespace ImGui;
 using global::camera;
 
+static const GLint swizzle[4] = {GL_RED, GL_RED, GL_RED, GL_ONE};
 static bool collapsed = true;
 
 u16 gui::fps = 1;
@@ -75,14 +79,18 @@ void gui::draw() {
 
     Spacing();
     SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
+
+    mg->noiseTex.bind();
+    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
     Image(mg->noiseTex.getId(), vec2(mg->size) * imgScale);
+    mg->noiseTex.unbind();
   }
 
   // ================== Terrain ======================== //
 
   if (CollapsingHeader("Terrain")) {
     SliderFloat("TESC divisions", &mg->tescDiv, 1.f, 1024.f);
-    SliderFloat("Height multiplier", &mg->heightMultiplier, 0.1f, 20.f);
+    SliderFloat("Height multiplier", &mg->heightMultiplier, 0.1f, 100.f);
 
     if (SliderFloat("Plane scale", &mg->planeScale, 0.1f, 1000.f))
       mg->plane.setScale({mg->planeScale, 1.f, mg->planeScale});
@@ -100,6 +108,19 @@ void gui::draw() {
 
       TreePop();
     }
+  }
+
+  if (CollapsingHeader("Falloff")) {
+    static float imgScale = 0.5f;
+
+    reGenTex |= SliderFloat("Parameter a", &mg->falloffA, 0.01f, 20.f);
+    reGenTex |= SliderFloat("Parameter b", &mg->falloffB, 0.01f, 20.f);
+    SliderFloat("Image scale##2", &imgScale, 0.01f, 1.f);
+
+    mg->falloffTex.bind();
+    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
+    Image(mg->falloffTex.getId(), vec2(mg->size) * imgScale);
+    mg->falloffTex.unbind();
   }
 
   if (reGenTex)

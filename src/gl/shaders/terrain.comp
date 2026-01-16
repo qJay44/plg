@@ -2,8 +2,9 @@
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
-layout(rgba8, binding = 0) readonly  uniform image2D imageRead;
-layout(rgba8, binding = 1) writeonly uniform image2D imageWrite;
+layout(r8   , binding = 0) readonly  uniform image2D imgFalloff;
+layout(r8   , binding = 1) readonly  uniform image2D imgNoise;
+layout(rgba8, binding = 2) writeonly uniform image2D imgTerrain;
 
 uniform float u_waterDeepHeight;
 uniform float u_waterShallowHeight;
@@ -25,8 +26,10 @@ uniform vec3 u_snowColor;
 
 void main() {
   const ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
-  float height = imageLoad(imageRead, texCoord).r;
+  float falloff = imageLoad(imgFalloff, texCoord).r;
+  float height = imageLoad(imgNoise, texCoord).r;
   vec3 col;
+  height = clamp(height - falloff, 0.f, 1.f);
 
   if      (height < u_waterDeepHeight)    col = u_waterDeepColor;
   else if (height < u_waterShallowHeight) col = u_waterShallowColor;
@@ -37,7 +40,7 @@ void main() {
   else if (height < u_rock2Height)        col = u_rock2Color;
   else                                    col = u_snowColor;
 
-  imageStore(imageWrite, texCoord, vec4(col, 1.f));
+  imageStore(imgTerrain, texCoord, vec4(col, height));
 }
 
 
