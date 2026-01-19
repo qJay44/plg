@@ -11,14 +11,17 @@ public:
 
 private:
   friend struct gui;
+  vec2 temp{1.f};
 
   TerrainChunk chunks[3][3];
   int chunkResolution = 5;
   float chunkSize = 64.f;
-  bool useDebugColors = false;
-  bool attachCam = true;
   ivec2 chunk00Coord{};
   MapGenerator sharedMapGen{};
+
+  bool useDebugColors = false;
+  bool attachCam = true;
+  bool autoChunkSize = true;
 
 private:
   void build(ivec2 coord00);

@@ -58,6 +58,7 @@ void gui::draw() {
     static bool sq = true;
 
     reGenTex |= Checkbox("Width = Height", &sq);
+    SetItemTooltip("Better to keep it on");
 
     if (SliderInt("Width", &mg.size.x, 1, 4096)) {
       if (sq) mg.size.y = mg.size.x;
@@ -90,11 +91,18 @@ void gui::draw() {
   if (CollapsingHeader("Terrain")) {
     SliderFloat("TESC divisions", &mg.tescDiv, 1.f, 1024.f);
     SliderFloat("Height multiplier", &mg.heightMultiplier, 0.1f, 100.f);
+
     Checkbox("Chunk debug colors", &terrainPtr->useDebugColors);
     Checkbox("Attach camera", &terrainPtr->attachCam);
 
-    reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 1, 20);
+    Checkbox("Auto chunk size", &terrainPtr->autoChunkSize);
+    SetItemTooltip("Will be half of the noise texture width");
+
+    BeginDisabled(terrainPtr->autoChunkSize);
     reGenTex |= SliderFloat("Chunk size", &terrainPtr->chunkSize, 1.f, 512.f);
+    EndDisabled();
+
+    reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 1, 20);
 
     if (TreeNode("Regions")) {
       for (size_t i = 0; i < mg.regions.size(); i++) {
