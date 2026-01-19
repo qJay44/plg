@@ -4,11 +4,9 @@
 #include <format>
 
 #include "gl/texture/image2D.hpp"
-#include "global.hpp"
+#include "gl/Shader.hpp"
 
-MapGenerator::MapGenerator(vec3 pos) {
-  plane.translate(pos);
-  plane.setScale({planeScale, 1.f, planeScale});
+MapGenerator::MapGenerator(vec2 offset) : offset(offset) {
   gen();
 }
 
@@ -79,19 +77,9 @@ void MapGenerator::gen() {
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-void MapGenerator::update() {
-  vec3 camPos = global::camera->getPosition();
-  gen();
-  offset.x = camPos.x;
-  offset.y = -camPos.z;
-
-  camPos.y = 0.f;
-  plane.setTrans(camPos);
-}
-
-void MapGenerator::draw(const Camera* camera, const Shader& shader, bool forceNoWireframe) const {
-  terrainTex.bind();
-  plane.draw(camera, shader, forceNoWireframe);
-  terrainTex.unbind();
+void MapGenerator::clear() {
+  falloffTex.clear();
+  noiseTex.clear();
+  terrainTex.clear();
 }
 

@@ -1,3 +1,4 @@
+#include "Terrain.hpp"
 #include <cassert>
 #include <cstdlib>
 
@@ -17,7 +18,6 @@
 #include "gl/Camera.hpp"
 #include "gl/InputsHandler.hpp"
 #include "gl/mesh/meshes.hpp"
-#include "MapGenerator.hpp"
 #include "gui.hpp"
 #include "utils/clrp.hpp"
 #include "global.hpp"
@@ -64,7 +64,7 @@ int main() {
   window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
   camera = new Camera({1031.f, 167.6f, 597.f}, {-0.73f, -0.42f, -0.44f}, 100.f);
   camera->setFarPlane(3000.f);
-  camera->setSpeedDefault(10.f);
+  camera->setSpeedDefault(100.f);
 
   assert(window);
   assert(camera);
@@ -112,10 +112,9 @@ int main() {
 
   Mesh axis = meshes::axis(500000.f);
 
-  MapGenerator mg;
-  shaderMain.setUniformTexture(mg.terrainTex);
+  Terrain terrain(camera->getPosition());
 
-  gui::mg = &mg;
+  gui::terrainPtr = &terrain;
 
   glEnable(GL_DEPTH_TEST);
 
@@ -154,11 +153,8 @@ int main() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    mg.update();
-
-    shaderMain.setUniform1i("u_div", mg.tescDiv);
-    shaderMain.setUniform1f("u_heightMultiplier", mg.heightMultiplier);
-    mg.draw(camera, shaderMain);
+    terrain.update(camera->getPosition());
+    terrain.draw(camera, shaderMain);
 
     if (global::drawGlobalAxis)
       axis.draw(camera, shaderV4Color);

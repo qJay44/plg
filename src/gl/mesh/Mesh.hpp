@@ -12,6 +12,7 @@
 
 class Mesh : public Transformable {
 public:
+  Mesh() = default;
   Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable);
   Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable);
   ~Mesh();
@@ -20,7 +21,7 @@ public:
   void draw(const Camera* camera, const Shader& shader, bool forceNoWireframe = false) const;
 
 private:
-  GLsizei count;
+  GLsizei count = 0;
   GLenum mode;
   bool autoClear;
   VAO vao;

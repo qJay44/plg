@@ -2,7 +2,6 @@
 
 #include <string>
 
-#include "MapGenerator.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "global.hpp"
 
@@ -15,7 +14,7 @@ static const GLint swizzle[4] = {GL_RED, GL_RED, GL_RED, GL_ONE};
 static bool collapsed = true;
 
 u16 gui::fps = 1;
-MapGenerator* gui::mg = nullptr;
+Terrain* gui::terrainPtr = nullptr;
 
 void gui::toggle() { collapsed = !collapsed; }
 
@@ -32,12 +31,11 @@ void gui::draw() {
   // ================== Camera ========================= //
 
   if (CollapsingHeader("Camera")) {
-    if (!camera) error("[gui] The camera is not linked to gui");
-
-    SliderFloat("Near##2",  &camera->nearPlane, 0.01f, 1.f);
-    SliderFloat("Far##2",   &camera->farPlane,  10.f , 1000.f);
-    SliderFloat("Speed##2", &camera->speed,     1.f  , 1000.f);
-    SliderFloat("FOV##2",   &camera->fov,       45.f , 179.f);
+    SliderFloat("Near", &camera->nearPlane, 0.01f, 1.f);
+    SliderFloat("Far", &camera->farPlane, 10.f, 1000.f);
+    SliderFloat("Speed defulat", &camera->speedDefult, 1.f, 1000.f);
+    SliderFloat("Speed multiplier", &camera->speedMul, 1.f, 1000.f);
+    SliderFloat("FOV", &camera->fov, 45.f, 179.f);
 
     Spacing();
     TextColored({0.f, 1.f, 1.f, 1.f}, "Position");
@@ -50,60 +48,63 @@ void gui::draw() {
 
   // ================== Noise texture ================== //
 
-  if (!mg) error("[gui] The MapGenerator is not linked to gui");
+  if (!terrainPtr) error("[gui] The terrain is not linked to gui");
 
+  MapGenerator& mg = terrainPtr->sharedMapGen;
   bool reGenTex = false;
 
   if (CollapsingHeader("Noise texture")) {
-    static float imgScale = 0.5f;
+    // static float imgScale = 0.5f;
     static bool sq = true;
 
     reGenTex |= Checkbox("Width = Height", &sq);
 
-    if (SliderInt("Width", &mg->size.x, 1, 4096)) {
-      if (sq) mg->size.y = mg->size.x;
+    if (SliderInt("Width", &mg.size.x, 1, 4096)) {
+      if (sq) mg.size.y = mg.size.x;
       reGenTex = true;
     }
 
-    if (SliderInt("Height", &mg->size.y, 1, 4096)) {
-      if (sq) mg->size.x = mg->size.y;
+    if (SliderInt("Height", &mg.size.y, 1, 4096)) {
+      if (sq) mg.size.x = mg.size.y;
       reGenTex = true;
     }
 
-    reGenTex |= SliderFloat("Scale", &mg->scale, 0.01f, 1000.f);
-    reGenTex |= SliderFloat("Persistance", &mg->persistance, 0.01f, 1.f);
-    reGenTex |= SliderFloat("Lacunarity", &mg->lacunarity, 1.f, 100.f);
-    reGenTex |= SliderInt("Octaves", &mg->octaves, 1, 10);
-    reGenTex |= DragInt("Seed", &mg->seed, 0.1f);
-    reGenTex |= DragFloat2("Offset", glm::value_ptr(mg->offset), 0.1f);
+    reGenTex |= SliderFloat("Scale", &mg.scale, 0.01f, 1000.f);
+    reGenTex |= SliderFloat("Persistance", &mg.persistance, 0.01f, 1.f);
+    reGenTex |= SliderFloat("Lacunarity", &mg.lacunarity, 1.f, 100.f);
+    reGenTex |= SliderInt("Octaves", &mg.octaves, 1, 10);
+    reGenTex |= DragInt("Seed", &mg.seed, 0.1f);
+    reGenTex |= DragFloat2("Offset", glm::value_ptr(mg.offset), 0.1f);
 
-    Spacing();
-    SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
+    // Spacing();
+    // SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
 
-    mg->noiseTex.bind();
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
-    Image(mg->noiseTex.getId(), vec2(mg->size) * imgScale);
-    mg->noiseTex.unbind();
+    // mg.noiseTex.bind();
+    // glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
+    // Image(mg.noiseTex.getId(), vec2(mg.size) * imgScale);
+    // mg.noiseTex.unbind();
   }
 
   // ================== Terrain ======================== //
 
   if (CollapsingHeader("Terrain")) {
-    SliderFloat("TESC divisions", &mg->tescDiv, 1.f, 1024.f);
-    SliderFloat("Height multiplier", &mg->heightMultiplier, 0.1f, 100.f);
+    SliderFloat("TESC divisions", &mg.tescDiv, 1.f, 1024.f);
+    SliderFloat("Height multiplier", &mg.heightMultiplier, 0.1f, 100.f);
+    Checkbox("Chunk debug colors", &terrainPtr->useDebugColors);
+    Checkbox("Attach camera", &terrainPtr->attachCam);
 
-    if (SliderFloat("Plane scale", &mg->planeScale, 0.1f, 1000.f))
-      mg->plane.setScale({mg->planeScale, 1.f, mg->planeScale});
+    reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 1, 20);
+    reGenTex |= SliderFloat("Chunk size", &terrainPtr->chunkSize, 1.f, 512.f);
 
     if (TreeNode("Regions")) {
-      for (size_t i = 0; i < mg->regions.size(); i++) {
-        std::string name = mg->regions[i].uniformFmt;
+      for (size_t i = 0; i < mg.regions.size(); i++) {
+        std::string name = mg.regions[i].uniformFmt;
         name.pop_back();
         name.pop_back();
         name = name.substr(2);
 
-        reGenTex |= SliderFloat((name + " height").c_str(), &mg->regions[i].height, 0.f, 1.f);
-        reGenTex |= ColorEdit3((name + " color").c_str(), glm::value_ptr(mg->regions[i].color));
+        reGenTex |= SliderFloat((name + " height").c_str(), &mg.regions[i].height, 0.f, 1.f);
+        reGenTex |= ColorEdit3((name + " color").c_str(), glm::value_ptr(mg.regions[i].color));
       }
 
       TreePop();
@@ -111,20 +112,22 @@ void gui::draw() {
   }
 
   if (CollapsingHeader("Falloff")) {
-    static float imgScale = 0.5f;
+    // static float imgScale = 0.5f;
 
-    reGenTex |= SliderFloat("Parameter a", &mg->falloffA, 0.01f, 20.f);
-    reGenTex |= SliderFloat("Parameter b", &mg->falloffB, 0.01f, 20.f);
-    SliderFloat("Image scale##2", &imgScale, 0.01f, 1.f);
+    reGenTex |= SliderFloat("Parameter a", &mg.falloffA, 0.01f, 20.f);
+    reGenTex |= SliderFloat("Parameter b", &mg.falloffB, 0.01f, 20.f);
+    // SliderFloat("Image scale##2", &imgScale, 0.01f, 1.f);
 
-    mg->falloffTex.bind();
-    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
-    Image(mg->falloffTex.getId(), vec2(mg->size) * imgScale);
-    mg->falloffTex.unbind();
+    // mg.falloffTex.bind();
+    // glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
+    // Image(mg.falloffTex.getId(), vec2(mg.size) * imgScale);
+    // mg.falloffTex.unbind();
   }
 
-  if (reGenTex)
-    mg->gen();
+  if (reGenTex) {
+    mg.gen();
+    terrainPtr->update(camera->getPosition(), true);
+  }
 
   // ================== Other ========================== //
 

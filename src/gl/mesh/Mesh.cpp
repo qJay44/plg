@@ -1,6 +1,7 @@
 #include "Mesh.hpp"
 
 #include "../../global.hpp"
+#include <cassert>
 
 Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
   : count(indices.size()),
@@ -56,12 +57,14 @@ Mesh::~Mesh() {
 };
 
 void Mesh::clear() {
-  if (vao.size) vao.clear();
-  if (vbo.size) vbo.clear();
-  if (ebo.size) ebo.clear();
+  vao.clear();
+  vbo.clear();
+  ebo.clear();
 }
 
 void Mesh::draw(const Camera* camera, const Shader& shader, bool forceNoWireframe) const {
+  assert(count);
+
   vao.bind();
 
   mat4 model = transMat * rotMat * scaleMat;

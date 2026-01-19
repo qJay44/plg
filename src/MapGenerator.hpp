@@ -1,20 +1,17 @@
 #pragma once
 
-#include "gl/mesh/meshes.hpp"
-#include "gl/Shader.hpp"
 #include "gl/texture/Texture.hpp"
 
 struct MapGenerator {
-  Mesh plane = meshes::plane(20, GL_PATCHES);
-  Texture noiseTex;
-  Texture terrainTex;
-  Texture falloffTex;
+  Texture noiseTex{};
+  Texture terrainTex{};
+  Texture falloffTex{};
 
   float falloffA = 3.f;
   float falloffB = 2.2f;
 
-  ivec2 size{512};
-  float scale = 25.f;
+  ivec2 size{128};
+  float scale = 125.f;
   float persistance = 0.5f;
   float lacunarity = 2.f;
   int octaves = 4;
@@ -23,7 +20,6 @@ struct MapGenerator {
 
   float tescDiv = 64.f;
   float heightMultiplier = 12.f;
-  float planeScale = 600.f;
 
   struct Region {
     const char* uniformFmt;
@@ -42,10 +38,10 @@ struct MapGenerator {
     Region{"u_snow{}"        , 1.00f, {1.00f, 1.00f, 1.00f}},
   };
 
-  MapGenerator(vec3 pos = vec3(0.f));
+  MapGenerator() = default;
+  MapGenerator(vec2 offset);
 
   void gen();
-  void update();
-  void draw(const Camera* camera, const Shader& shader, bool forceNoWireframe = false) const;
+  void clear();
 };
 

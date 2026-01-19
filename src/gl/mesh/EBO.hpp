@@ -2,7 +2,7 @@
 
 // Element Buffer Object
 struct EBO {
-  GLuint id;
+  GLuint id = 0;
   GLsizei size = 0;
 
   EBO() {}
@@ -16,6 +16,10 @@ struct EBO {
   static void unbind() { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
 
   void bind()   const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id); }
-  void clear()        { glDeleteBuffers(size, &id); size = 0; }
+  void clear()        {
+    if (id) glDeleteBuffers(size, &id);
+    id = 0;
+    size = 0;
+  }
 };
 

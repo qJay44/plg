@@ -1,10 +1,10 @@
 #pragma once
 
-#include "MapGenerator.hpp"
+#include "Terrain.hpp"
 
 struct gui {
   static u16 fps;
-  static MapGenerator* mg;
+  static Terrain* terrainPtr;
 
   static void toggle();
   static void draw();

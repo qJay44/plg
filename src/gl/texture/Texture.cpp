@@ -36,8 +36,8 @@ void Texture::unbind() const {
 }
 
 void Texture::clear() {
-  if (id)
-    glDeleteTextures(1, &id);
+  if (id) glDeleteTextures(1, &id);
+  id = 0;
 }
 
 const GLuint& Texture::getId() const { return id; }

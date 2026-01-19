@@ -29,7 +29,7 @@ public:
   void setUniformName(const std::string& name);
 
 private:
-  TextureDescriptor desc;
+  TextureDescriptor desc{};
   GLuint id = 0;
 
 private:
