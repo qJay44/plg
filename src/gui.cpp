@@ -105,6 +105,7 @@ void gui::draw() {
     reGenTex |= SliderFloat("Chunk size", &terrainPtr->chunkSize, 1.f, 512.f);
     EndDisabled();
 
+    reGenTex |= SliderInt("Chunks per axis", &terrainPtr->chunksPerAxis, 1, 50);
     reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 1, 20);
 
     if (TreeNode("Regions")) {
@@ -141,7 +142,6 @@ void gui::draw() {
   }
 
   if (reGenTex) {
-    mg.gen();
     terrainPtr->update(camera->getPosition(), true);
   }
 

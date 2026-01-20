@@ -15,18 +15,23 @@ float fade(float t) {
   return t*t*t*(t*(t*6.f - 15.f) + 10.f);
 }
 
-uint pcg_hash(uint v) {
-  uint state = v * 747796405u + 2891336453u;
-  uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
-  return (word >> 22u) ^ word;
+uint rngState = u_seed;
+
+// Returns value in [0, 1]
+float rand1() {
+  rngState = rngState * 747796405u + 2891336453u;
+  uint result = ((rngState >> ((rngState >> 28) + 4u)) ^ rngState) * 277803737u;
+  result = (result >> 22) ^ result;
+
+  return result / 4294967295.f;
 }
 
-float rand(vec2 p) {
-  return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+float rand2(vec2 p) {
+  return fract(sin(dot(p, vec2(12.9898f, 78.233f))) * 43758.5453f);
 }
 
 vec2 grad(vec2 p) {
-  float angle = 3.141592654f * 2.f * rand(p);
+  float angle = 3.141592654f * 2.f * rand2(p);
   return vec2(sin(angle), cos(angle));
 }
 
@@ -67,7 +72,7 @@ void main() {
   float n = 0.f;
 
   for (int i = 0; i < u_octaves; i++) {
-    vec2 offset = pcg_hash(u_seed) % 200000 - 100000.f + u_offset;
+    vec2 offset = rand1() * 200000.f - 100000.f + u_offset;
     vec2 sampleCoord = vec2(texCoord - halfSize + offset) * u_invScale * frequency;
     n += perlin(sampleCoord) * amplitude;
     amplitude *= u_persistance;

@@ -62,9 +62,10 @@ int main() {
 
   // Globals
   window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
-  camera = new Camera({1031.f, 167.6f, 597.f}, {-0.73f, -0.42f, -0.44f}, 100.f);
+  camera = new Camera({119.f, 283.f, 121.f}, {-0.11f, -0.88f, -0.32f}, 100.f);
   camera->setFarPlane(3000.f);
   camera->setSpeedDefault(100.f);
+  camera->setFov(90.f);
 
   assert(window);
   assert(camera);

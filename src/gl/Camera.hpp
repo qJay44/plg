@@ -30,6 +30,7 @@ public:
   void setFarPlane(const float& p);
   void setSpeedDefault(const float& s);
   void setSpeedMultiplier(const float& m);
+  void setFov(float f);
 
   void update();
 

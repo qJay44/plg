@@ -13,7 +13,9 @@ private:
   friend struct gui;
   vec2 temp{1.f};
 
-  TerrainChunk chunks[3][3];
+  int chunksPerAxis = 6;
+  std::vector<TerrainChunk> chunks;
+
   int chunkResolution = 5;
   float chunkSize = 64.f;
   ivec2 chunk00Coord{};

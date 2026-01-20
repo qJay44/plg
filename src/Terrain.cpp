@@ -1,6 +1,8 @@
 #include "Terrain.hpp"
 
 #include "MapGenerator.hpp"
+#include "colormaps/jet.hpp"
+#include "global.hpp"
 
 Terrain::Terrain(vec3 pos) {
   build(glm::floor(vec2{pos.x, pos.z} / chunkSize));
@@ -17,50 +19,46 @@ void Terrain::update(vec3 pos, bool force) {
 }
 
 void Terrain::draw(const Camera* camera, const Shader& shader, bool forceNoWireframe) const {
-  static constexpr vec3 chunkDebugColors[] = {
-    {0.200f, 0.659f, 0.780f}, // #33a8c7
-    {0.322f, 0.890f, 0.882f}, // #52e3e1
-    {0.627f, 0.894f, 0.149f}, // #a0e426
-    {0.992f, 0.945f, 0.282f}, // #fdf148
-    {1.000f, 0.671f, 0.000f}, // #ffab00
-    {0.969f, 0.475f, 0.463f}, // #f77976
-    {0.941f, 0.314f, 0.682f}, // #f050ae
-    {0.847f, 0.514f, 1.000f}, // #d883ff
-    {0.576f, 0.212f, 0.992f}  // #9336fd
-  };
-
   shader.setUniform1i("u_div", sharedMapGen.tescDiv);
   shader.setUniform1f("u_heightMultiplier", sharedMapGen.heightMultiplier);
   shader.setUniform1i("u_useDebugColors", useDebugColors);
+  float colormapStep = 9.f / chunks.size();
 
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      const TerrainChunk& tc = chunks[i][j];
+  for (size_t i = 0; i < chunks.size(); i++) {
+    const TerrainChunk& tc = chunks[i];
 
-      shader.setUniformTexture(tc.mg.terrainTex);
-      shader.setUniform3f("u_chunkDebugColor", chunkDebugColors[j + i * 3]);
+    shader.setUniformTexture(tc.mg.terrainTex);
+    shader.setUniform3f("u_chunkDebugColor", colormaps::jet[static_cast<size_t>(i * colormapStep)]);
 
-      tc.mg.terrainTex.bind();
-      tc.draw(camera, shader, forceNoWireframe);
-      tc.mg.terrainTex.unbind();
-    }
+    tc.mg.terrainTex.bind();
+    tc.draw(camera, shader, forceNoWireframe);
+    tc.mg.terrainTex.unbind();
   }
 }
 
 void Terrain::build(ivec2 coord00) {
+  size_t chunksTotal = chunksPerAxis * chunksPerAxis;
+
   if (attachCam)
     chunk00Coord = coord00;
 
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      TerrainChunk& tc = chunks[i][j];
+  if (chunks.size() != chunksTotal)
+    chunks.resize(chunksTotal);
 
-      ivec2 coord = ivec2{j, i} - 1;
+  const vec3& camPos = global::camera->getPosition();
+  const vec2 camOnChunkPos = vec2{camPos.x, camPos.z};
+
+  for (int i = 0; i < chunksPerAxis; i++) {
+    for (int j = 0; j < chunksPerAxis; j++) {
+      TerrainChunk& tc = chunks[j + i * chunksPerAxis];
+
+      ivec2 coord = ivec2{j, i} - chunksPerAxis / 2;
       vec2 chunkCoord = vec2(chunk00Coord + coord);
-      vec2 chunkPos = chunkCoord * chunkSize;
+      vec2 chunkPos = chunkCoord * chunkSize + chunkSize * 0.5f; // center
 
       MapGenerator mg(sharedMapGen);
-      mg.offset = sharedMapGen.offset + chunkPos + chunkSize * vec2(coord);
+      mg.offset = sharedMapGen.offset + camOnChunkPos + chunkPos;
+      mg.offset += chunkSize * vec2(coord);
       mg.offset.y *= -1.f;
 
       tc.clear();
