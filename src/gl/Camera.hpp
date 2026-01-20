@@ -2,6 +2,8 @@
 
 class Camera {
 public:
+  friend struct gui;
+
   Camera() = delete;
   Camera(Camera&) = delete;
   Camera(Camera&&) = delete;
@@ -22,7 +24,7 @@ public:
   vec3 getLeft()    const;
   vec3 getRight()   const;
   vec3 getForward() const;
-  vec3 getDown()  const;
+  vec3 getDown()    const;
 
   void setNearPlane(const float& p);
   void setFarPlane(const float& p);
@@ -37,11 +39,11 @@ public:
   virtual void moveRight();
   virtual void moveUp();
   virtual void moveDown();
-  virtual void moveByMouse(dvec2 mousePos);
+  virtual void moveByMouse(vec2 mousePos);
 
 protected:
   vec3 position, orientation;
-  double sensitivity;
+  float sensitivity;
 
   float nearPlane = 0.1f;
   float farPlane = 100.f;
@@ -59,9 +61,6 @@ protected:
 protected:
   virtual void calcView();
 
-  void calcOrientation(const float& radRotX, const float& radRotY);
-
-private:
-  friend struct gui;
+  void calcOrientation(vec2 rot);
 };
 

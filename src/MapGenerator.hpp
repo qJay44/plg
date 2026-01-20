@@ -21,6 +21,8 @@ struct MapGenerator {
   float tescDiv = 64.f;
   float heightMultiplier = 12.f;
 
+  bool useFalloffmap = false;
+
   struct Region {
     const char* uniformFmt;
     float height;

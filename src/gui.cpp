@@ -98,6 +98,9 @@ void gui::draw() {
     Checkbox("Auto chunk size", &terrainPtr->autoChunkSize);
     SetItemTooltip("Will be half of the noise texture width");
 
+    ivec2 coord = glm::floor(vec2(camera->position.x, camera->position.z) / terrainPtr->chunkSize);
+    Text("Chunk00 coord {%d, %d}", coord.x, coord.y);
+
     BeginDisabled(terrainPtr->autoChunkSize);
     reGenTex |= SliderFloat("Chunk size", &terrainPtr->chunkSize, 1.f, 512.f);
     EndDisabled();
@@ -122,6 +125,9 @@ void gui::draw() {
   if (CollapsingHeader("Falloff")) {
     // static float imgScale = 0.5f;
 
+    reGenTex |= Checkbox("Enable", &mg.useFalloffmap);
+
+    BeginDisabled(!mg.useFalloffmap);
     reGenTex |= SliderFloat("Parameter a", &mg.falloffA, 0.01f, 20.f);
     reGenTex |= SliderFloat("Parameter b", &mg.falloffB, 0.01f, 20.f);
     // SliderFloat("Image scale##2", &imgScale, 0.01f, 1.f);
@@ -130,6 +136,8 @@ void gui::draw() {
     // glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
     // Image(mg.falloffTex.getId(), vec2(mg.size) * imgScale);
     // mg.falloffTex.unbind();
+
+    EndDisabled();
   }
 
   if (reGenTex) {

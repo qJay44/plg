@@ -49,6 +49,7 @@ void MapGenerator::gen() {
 
   falloffShader.setUniform1f("a", falloffA);
   falloffShader.setUniform1f("b", falloffB);
+  falloffShader.setUniform1i("use", useFalloffmap);
 
   glBindImageTexture(0, falloffTex.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R8);
   glDispatchCompute(numGroups.x, numGroups.y, 1);

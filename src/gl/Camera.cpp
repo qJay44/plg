@@ -61,33 +61,36 @@ void Camera::moveRight()   { position +=  normalize(cross(orientation, up)) * sp
 void Camera::moveUp()   { position +=  up * speed * global::dt; }
 void Camera::moveDown() { position += -up * speed * global::dt; }
 
-void Camera::moveByMouse(dvec2 mousePos) {
-  dvec2 winSize = global::getWinSize();
-  dvec2 winCenter = winSize * 0.5;
-  dvec2 ignore = (winCenter - mousePos) * dvec2(global::guiFocused);
-  dvec2 pos = mousePos - winCenter + ignore;
+void Camera::moveByMouse(vec2 mousePos) {
+  vec2 winSize = global::getWinSize();
+  vec2 winCenter = winSize * 0.5f;
+  vec2 ignore = (winCenter - mousePos) * vec2(global::guiFocused);
+  vec2 pos = mousePos - winCenter + ignore;
 
   // Normalizes and shifts the coordinates of the cursor such that they begin in the middle of the screen
   // and then "transforms" them into degrees
-  dvec2 rot = sensitivity * pos / winSize;
-  dvec2 radRot = glm::radians(-rot);
+  vec2 rot = sensitivity * pos / winSize;
+  vec2 radRot = glm::radians(-rot);
 
-  calcOrientation(radRot.y, radRot.x);
+  calcOrientation(radRot);
 }
 
 void Camera::calcView() {
   view = lookAt(position, position + orientation, up);
 }
 
-void Camera::calcOrientation(const float& radRotX, const float& radRotY) {
-  // Calculates upcoming vertical change in the Orientation
-  vec3 newOrientation = rotate(orientation, radRotX, normalize(cross(orientation, up)));
+void Camera::calcOrientation(vec2 rot) {
+  float cosAngle = dot(up, orientation);
+  if (cosAngle * glm::sign(rot.y) > 0.91f)
+    rot.y = 0.f;
 
-  // Decides whether the next vertical Orientation is legal or not
-  if (!(angle(newOrientation, up) <= glm::radians(5.f) || angle(newOrientation, -up) <= glm::radians(5.f)))
-    orientation = newOrientation;
+  // Rotate horizontally
+  glm::quat quat = glm::angleAxis(rot.x, up);
+  orientation = quat * orientation;
 
-  // Rotates the Orientation left and right
-  orientation = rotate(orientation, radRotY, up);
+  // Rotate vertically
+  quat = glm::angleAxis(rot.y, getRight());
+  orientation = quat * orientation;
+  calcView();
 }
 
