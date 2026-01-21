@@ -10,7 +10,7 @@ struct MapGenerator {
   float falloffA = 3.f;
   float falloffB = 2.2f;
 
-  ivec2 size{128};
+  ivec2 size{512};
   float scale = 125.f;
   float persistance = 0.5f;
   float lacunarity = 2.f;
@@ -19,7 +19,7 @@ struct MapGenerator {
   vec2 offset{};
 
   float tescDiv = 64.f;
-  float heightMultiplier = 12.f;
+  float heightMultiplier = 10.f;
 
   bool useFalloffmap = false;
 

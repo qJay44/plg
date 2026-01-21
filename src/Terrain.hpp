@@ -11,9 +11,8 @@ public:
 
 private:
   friend struct gui;
-  vec2 temp{1.f};
 
-  int chunksPerAxis = 6;
+  int chunksPerAxis = 3;
   std::vector<TerrainChunk> chunks;
 
   int chunkResolution = 5;

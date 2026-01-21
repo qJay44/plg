@@ -47,22 +47,24 @@ void Terrain::build(ivec2 coord00) {
 
   const vec3& camPos = global::camera->getPosition();
   const vec2 camOnChunkPos = vec2{camPos.x, camPos.z};
+  const int distFromMiddle = chunksPerAxis / 2;
 
   for (int i = 0; i < chunksPerAxis; i++) {
     for (int j = 0; j < chunksPerAxis; j++) {
       TerrainChunk& tc = chunks[j + i * chunksPerAxis];
 
-      ivec2 coord = ivec2{j, i} - chunksPerAxis / 2;
+      ivec2 coord = ivec2{j, i} - distFromMiddle; // offset to build around camera (centered)
       vec2 chunkCoord = vec2(chunk00Coord + coord);
-      vec2 chunkPos = chunkCoord * chunkSize + chunkSize * 0.5f; // center
+      vec2 chunkPos = chunkCoord * chunkSize;
+      vec2 chunkCenterPos = chunkPos + chunkSize * 0.5f; // center of a chunk
 
       MapGenerator mg(sharedMapGen);
-      mg.offset = sharedMapGen.offset + camOnChunkPos + chunkPos;
-      mg.offset += chunkSize * vec2(coord);
+      mg.offset = sharedMapGen.offset + camOnChunkPos; // Camera offset
+      mg.offset += chunkPos * 2.f; // Chunk position offset
       mg.offset.y *= -1.f;
 
       tc.clear();
-      tc = TerrainChunk(chunkResolution, {chunkPos.x, 0.f, chunkPos.y}, chunkSize, mg);
+      tc = TerrainChunk(chunkResolution, {chunkCenterPos.x, 0.f, chunkCenterPos.y}, chunkSize, mg);
     }
   }
 }
