@@ -73,6 +73,7 @@ void gui::draw() {
     reGenTex |= SliderFloat("Scale", &mg.scale, 0.01f, 1000.f);
     reGenTex |= SliderFloat("Persistance", &mg.persistance, 0.01f, 1.f);
     reGenTex |= SliderFloat("Lacunarity", &mg.lacunarity, 1.f, 100.f);
+    reGenTex |= SliderFloat("Noise max reduce", &mg.noiseMaxReducer, -5.f, 5.f);
     reGenTex |= SliderInt("Octaves", &mg.octaves, 1, 10);
     reGenTex |= DragInt("Seed", &mg.seed, 0.1f);
     reGenTex |= DragFloat2("Offset", glm::value_ptr(mg.offset), 0.1f);
@@ -105,8 +106,8 @@ void gui::draw() {
     reGenTex |= SliderFloat("Chunk size", &terrainPtr->chunkSize, 1.f, 512.f);
     EndDisabled();
 
-    reGenTex |= SliderInt("Chunks per axis", &terrainPtr->chunksPerAxis, 1, 50);
-    reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 1, 20);
+    reGenTex |= SliderInt("Chunks per axis", &terrainPtr->chunksPerAxis, 1, 10);
+    reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 2, 20);
 
     if (TreeNode("Regions")) {
       for (size_t i = 0; i < mg.regions.size(); i++) {

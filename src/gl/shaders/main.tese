@@ -3,11 +3,15 @@
 layout (quads, equal_spacing, cw) in;
 
 in vec2 uvsCoord[];
-out vec2 texCoord;
 
+out vec2 texCoord;
+out vec2 chunkTexCoord;
+
+uniform sampler2D u_terrainTex;
+uniform vec2 u_chunks;
+uniform vec2 u_chunkOffset;
 uniform mat4 u_cam;
 uniform float u_heightMultiplier;
-uniform sampler2D u_terrainTex;
 
 void main() {
   float u = gl_TessCoord.x;
@@ -21,6 +25,7 @@ void main() {
   vec2 leftUV  = uv0 + v * (uv3 - uv0);
   vec2 rightUV = uv1 + v * (uv2 - uv1);
   texCoord = leftUV + u * (rightUV - leftUV);
+  chunkTexCoord = texCoord / u_chunks + u_chunkOffset;
 
   vec4 pos0 = gl_in[0].gl_Position;
   vec4 pos1 = gl_in[1].gl_Position;
@@ -31,7 +36,7 @@ void main() {
   vec4 rightPos = pos1 + v * (pos2 - pos1);
   vec4 pos = leftPos + u * (rightPos - leftPos);
 
-  float height = texture(u_terrainTex, texCoord).a;
+  float height = texture(u_terrainTex, chunkTexCoord).a;
   height = pow(2, (max(height, 0.4f) - 0.4f) * u_heightMultiplier) - 1.f;
   pos.y += height;
 

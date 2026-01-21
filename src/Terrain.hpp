@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MapGenerator.hpp"
 #include "TerrainChunk.hpp"
 
 class Terrain {

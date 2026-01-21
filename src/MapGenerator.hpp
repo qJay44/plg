@@ -14,6 +14,7 @@ struct MapGenerator {
   float scale = 125.f;
   float persistance = 0.5f;
   float lacunarity = 2.f;
+  float noiseMaxReducer = 1.23f;
   int octaves = 4;
   int seed = 1;
   vec2 offset{};

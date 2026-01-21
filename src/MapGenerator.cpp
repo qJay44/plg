@@ -58,6 +58,7 @@ void MapGenerator::gen() {
   noiseShader.setUniform1f("u_invScale", 1.f / std::max(scale, 0.01f));
   noiseShader.setUniform1f("u_persistance", persistance);
   noiseShader.setUniform1f("u_lacunarity", lacunarity);
+  noiseShader.setUniform1f("u_noiseMaxReducer", noiseMaxReducer);
   noiseShader.setUniform1i("u_octaves", octaves);
   noiseShader.setUniform1i("u_seed", seed);
   noiseShader.setUniform2f("u_offset", offset);

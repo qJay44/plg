@@ -7,13 +7,10 @@ layout(r8, binding = 1) writeonly uniform image2D imageWrite;
 uniform float u_invScale;
 uniform float u_persistance;
 uniform float u_lacunarity;
+uniform float u_noiseMaxReducer;
 uniform int u_octaves;
 uniform int u_seed;
 uniform vec2 u_offset;
-
-float fade(float t) {
-  return t*t*t*(t*(t*6.f - 15.f) + 10.f);
-}
 
 uint rngState = u_seed;
 
@@ -33,6 +30,10 @@ float rand2(vec2 p) {
 vec2 grad(vec2 p) {
   float angle = 3.141592654f * 2.f * rand2(p);
   return vec2(sin(angle), cos(angle));
+}
+
+float fade(float t) {
+  return t*t*t*(t*(t*6.f - 15.f) + 10.f);
 }
 
 // Returns value in [-1, 1]
@@ -59,13 +60,13 @@ float perlin(vec2 p) {
   return (1.f - fade1) * p0p1 + fade1 * p2p3;
 }
 
+// NOTE: Hardcoded max and min, a bit adjusted to make higher values appear more often
+float noiseMax = u_octaves * u_persistance - u_noiseMaxReducer;
+float noiseMin = -noiseMax;
+
 void main() {
   const ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
   const ivec2 halfSize = imageSize(imageWrite) / 2;
-
-  // NOTE: Hardcoded max and min, a bit adjusted to make higher values appear more often
-  const float noiseMax = u_octaves * u_persistance - 1.23f;
-  const float noiseMin = -noiseMax;
 
   float amplitude = 1.f;
   float frequency = 1.f;

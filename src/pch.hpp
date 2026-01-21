@@ -37,7 +37,7 @@ using glm::mat4;
                                                                         \
   ImVec2 operator+(const ImVec2& rhs) const {                           \
     return ImVec2(x + rhs.x, y + rhs.y);                                \
-  }
+  }                                                                     \
 
 #define IM_VEC3_CLASS_EXTRA                                             \
   constexpr ImVec3(const vec3& f) : x(f.x), y(f.y), z(f.z) {}           \
