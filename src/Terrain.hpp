@@ -13,6 +13,7 @@ private:
   friend struct gui;
 
   int chunksPerAxis = 3;
+  size_t chunksTotal = chunksPerAxis * chunksPerAxis;
   std::vector<TerrainChunk> chunks;
 
   int chunkResolution = 5;

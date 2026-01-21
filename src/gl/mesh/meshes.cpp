@@ -7,7 +7,7 @@
 
 namespace meshes {
 
-Mesh plane(vec3 color, GLenum mode, bool clearable) {
+Mesh plane(vec3 color, GLenum mode, bool autoClear) {
   std::vector<Vertex4> vertices{
     {{-1.f, -1.f, 0.f}, color, {0.f, 0.f}, {1.f, 0.f, 0.f}},
     {{-1.f,  1.f, 0.f}, color, {0.f, 1.f}, {1.f, 0.f, 0.f}},
@@ -19,29 +19,27 @@ Mesh plane(vec3 color, GLenum mode, bool clearable) {
 
   switch (mode) {
     case GL_TRIANGLES: {
-      std::vector<GLuint> _indices{
+      indices = {
         0, 1, 2,
         2, 3, 0
       };
-      indices = _indices;
       break;
     }
     case GL_PATCHES: {
-      std::vector<GLuint> _indices{
+      indices = {
         0, 1,
         2, 3,
       };
-      indices = _indices;
       break;
     }
     default:
       error("[meshes::plane] Unhandled mode [{}]", mode);
   }
 
-  return Mesh(vertices, indices, mode, clearable);
+  return Mesh(vertices, indices, mode, autoClear);
 }
 
-Mesh plane(size_t resolution, GLenum mode, bool clearable) {
+Mesh plane(size_t resolution, GLenum mode, bool autoClear) {
   size_t indicesPerQuad = 0;
   if      (mode == GL_TRIANGLES) indicesPerQuad = 6;
   else if (mode == GL_PATCHES)   indicesPerQuad = 4;
@@ -98,10 +96,10 @@ Mesh plane(size_t resolution, GLenum mode, bool clearable) {
     }
   }
 
-  return Mesh(vertices, indices, mode, clearable);
+  return Mesh(vertices, indices, mode, autoClear);
 }
 
-Mesh axis(float size, bool clearable) {
+Mesh axis(float size, bool autoClear) {
   std::vector<Vertex4> vertices{
     {{0.f, 0.f, 0.f} , global::red},
     {{size, 0.f, 0.f}, global::red},
@@ -117,7 +115,8 @@ Mesh axis(float size, bool clearable) {
     4, 5
   };
 
-  return Mesh(vertices, indices, GL_LINES, clearable);
+  return Mesh(vertices, indices, GL_LINES, autoClear);
 }
 
 } // namespace meshes
+

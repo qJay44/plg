@@ -2,7 +2,6 @@
 
 #include "MapGenerator.hpp"
 #include "colormaps/jet.hpp"
-#include "global.hpp"
 
 Terrain::Terrain(vec3 pos) {
   build(glm::floor(vec2{pos.x, pos.z} / chunkSize));
@@ -14,7 +13,7 @@ void Terrain::update(vec3 pos, bool force) {
   if (autoChunkSize)
     chunkSize = sharedMapGen.size.x * 0.5f;
 
-  if ((chunk00Coord != coord00) || force)
+  if ((chunk00Coord != coord00 && attachCam) || force)
     build(coord00);
 }
 
@@ -22,7 +21,9 @@ void Terrain::draw(const Camera* camera, const Shader& shader, bool forceNoWiref
   shader.setUniform1i("u_div", sharedMapGen.tescDiv);
   shader.setUniform1f("u_heightMultiplier", sharedMapGen.heightMultiplier);
   shader.setUniform1i("u_useDebugColors", useDebugColors);
-  float colormapStep = 9.f / chunks.size();
+
+  constexpr float _jetLenf = colormaps::jet.size();
+  float colormapStep = _jetLenf / chunks.size();
 
   for (size_t i = 0; i < chunks.size(); i++) {
     const TerrainChunk& tc = chunks[i];
@@ -37,16 +38,12 @@ void Terrain::draw(const Camera* camera, const Shader& shader, bool forceNoWiref
 }
 
 void Terrain::build(ivec2 coord00) {
-  size_t chunksTotal = chunksPerAxis * chunksPerAxis;
-
-  if (attachCam)
-    chunk00Coord = coord00;
+  chunksTotal = chunksPerAxis * chunksPerAxis;
+  chunk00Coord = coord00;
 
   if (chunks.size() != chunksTotal)
     chunks.resize(chunksTotal);
 
-  const vec3& camPos = global::camera->getPosition();
-  const vec2 camOnChunkPos = vec2{camPos.x, camPos.z};
   const int distFromMiddle = chunksPerAxis / 2;
 
   for (int i = 0; i < chunksPerAxis; i++) {
@@ -59,7 +56,7 @@ void Terrain::build(ivec2 coord00) {
       vec2 chunkCenterPos = chunkPos + chunkSize * 0.5f; // center of a chunk
 
       MapGenerator mg(sharedMapGen);
-      mg.offset = sharedMapGen.offset + camOnChunkPos; // Camera offset
+      mg.offset = sharedMapGen.offset;
       mg.offset += chunkPos * 2.f; // Chunk position offset
       mg.offset.y *= -1.f;
 
