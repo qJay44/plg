@@ -22,7 +22,8 @@ private:
   ivec2 chunk00Coord{};
   MapGenerator sharedMapGen{};
 
-  bool useDebugColors = false;
+  bool showChunks = false;
+  bool showChunkNormals = false;
   bool attachCam = true;
   bool autoChunkSize = true;
 

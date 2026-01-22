@@ -93,7 +93,8 @@ void gui::draw() {
     SliderFloat("TESC divisions", &mg.tescDiv, 1.f, 1024.f);
     SliderFloat("Height multiplier", &mg.heightMultiplier, 0.1f, 100.f);
 
-    Checkbox("Chunk debug colors", &terrainPtr->useDebugColors);
+    Checkbox("Colorize chunks", &terrainPtr->showChunks);
+    Checkbox("Show chunk normals", &terrainPtr->showChunkNormals);
     Checkbox("Attach camera", &terrainPtr->attachCam);
 
     Checkbox("Auto chunk size", &terrainPtr->autoChunkSize);

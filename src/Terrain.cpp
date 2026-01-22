@@ -26,7 +26,8 @@ void Terrain::update(vec3 pos, bool force) {
 void Terrain::draw(const Camera* camera, const Shader& shader, bool forceNoWireframe) const {
   shader.setUniform1i("u_div", sharedMapGen.tescDiv);
   shader.setUniform1f("u_heightMultiplier", sharedMapGen.heightMultiplier);
-  shader.setUniform1i("u_useDebugColors", useDebugColors);
+  shader.setUniform1f("u_maskDebugColors", showChunks);
+  shader.setUniform1f("u_maskNormalmap", showChunkNormals);
 
   shader.setUniformTexture(sharedMapGen.terrainTex);
   shader.setUniform2f("u_chunks", vec2(chunksPerAxis));

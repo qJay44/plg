@@ -6,42 +6,35 @@
 
 #include "utils/clrp.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "utils/utils.hpp"
 
 fspath Shader::directory = "";
 
-Shader::Shader() {}
+Shader::Shader(const fspath& vsPath, const fspath& fsPath, const fspath& gsPath)
+  : Shader(vsPath, fsPath, "", "", gsPath) {}
 
-Shader::Shader(const fspath& vsPath, const fspath& fsPath, const fspath& gsPath) {
+Shader::Shader(const fspath& vsPath, const fspath& fsPath, const fspath& tescPath, const fspath& tesePath, const fspath& gsPath) {
   program = glCreateProgram();
-  GLuint shaders[3];
+  GLuint shaders[5];
   u8 idx = 0;
 
   shaders[idx++] = compile(vsPath, GL_VERTEX_SHADER);
   shaders[idx++] = compile(fsPath, GL_FRAGMENT_SHADER);
 
-  if (!gsPath.empty()) shaders[idx++] = compile(gsPath, GL_GEOMETRY_SHADER);
+  if (!tescPath.empty()) {
+    if (tesePath.empty())
+      error("[Shader::Shader] Provided TCS shader [{}] but no TES shader [{}]", tescPath.string(), tesePath.string());
 
-  for (int i = 0; i < idx; i++)
-    glAttachShader(program, shaders[i]);
+    shaders[idx++] = compile(tescPath, GL_TESS_CONTROL_SHADER);
+    shaders[idx++] = compile(tesePath, GL_TESS_EVALUATION_SHADER);
+  }
 
+  if (!gsPath.empty())
+    shaders[idx++] = compile(gsPath, GL_GEOMETRY_SHADER);
+
+  for (int i = 0; i < idx; i++) glAttachShader(program, shaders[i]);
   link(program);
-
-  for (int i = 0; i < idx; i++)
-    glDeleteShader(shaders[i]);
-}
-
-Shader::Shader(const fspath& vsPath, const fspath& fsPath, const fspath& tescPath, const fspath& tesePath) {
-  program = glCreateProgram();
-  GLuint shaders[4];
-
-  shaders[0] = compile(vsPath, GL_VERTEX_SHADER);
-  shaders[1] = compile(fsPath, GL_FRAGMENT_SHADER);
-  shaders[2] = compile(tescPath, GL_TESS_CONTROL_SHADER);
-  shaders[3] = compile(tesePath, GL_TESS_EVALUATION_SHADER);
-
-  for (int i = 0; i < 4; i++) glAttachShader(program, shaders[i]);
-  link(program);
-  for (int i = 0; i < 4; i++) glDeleteShader(shaders[i]);
+  for (int i = 0; i < idx; i++) glDeleteShader(shaders[i]);
 }
 
 Shader::Shader(const fspath& compPath) {
@@ -50,10 +43,6 @@ Shader::Shader(const fspath& compPath) {
   glAttachShader(program, shader);
   link(program);
   glDeleteShader(shader);
-}
-
-void Shader::clear() {
-  glDeleteProgram(program);
 }
 
 void Shader::setDirectoryLocation(const fspath& path) { Shader::directory = path; }

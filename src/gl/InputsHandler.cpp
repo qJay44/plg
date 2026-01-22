@@ -34,6 +34,10 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
       if (action == GLFW_PRESS && !global::guiFocused)
         global::drawGlobalAxis = !global::drawGlobalAxis;
       break;
+    case GLFW_KEY_3:
+      if (action == GLFW_PRESS && !global::guiFocused)
+        global::drawNormals = !global::drawNormals;
+      break;
   }
 
   if (global::guiFocused)

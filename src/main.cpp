@@ -102,6 +102,7 @@ int main() {
   glPatchParameteri(GL_PATCH_VERTICES, 4);
 
   Shader shaderMain("main.vert", "main.frag", "main.tesc", "main.tese");
+  Shader shaderMainNormals("main.vert", "main.frag", "main.tesc", "main.tese", "main.geom");
   Shader shaderV4Color("v4_color.vert", "v4_color.frag");
 
   // ===== Inputs Handler ======================================= //
@@ -155,7 +156,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     terrain.update(camera->getPosition());
-    terrain.draw(camera, shaderMain);
+    terrain.draw(camera, global::drawNormals ? shaderMainNormals : shaderMain);
 
     if (global::drawGlobalAxis)
       axis.draw(camera, shaderV4Color);

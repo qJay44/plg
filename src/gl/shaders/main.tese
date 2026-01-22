@@ -4,8 +4,12 @@ layout (quads, equal_spacing, cw) in;
 
 in vec2 uvsCoord[];
 
-out vec2 texCoord;
-out vec2 chunkTexCoord;
+out DATA {
+  vec4 vertPos;
+  vec2 texCoord;
+  vec2 chunkTexCoord;
+  vec3 chunkNormal;
+} dataOut;
 
 uniform sampler2D u_terrainTex;
 uniform vec2 u_chunks;
@@ -13,33 +17,41 @@ uniform vec2 u_chunkOffset;
 uniform mat4 u_cam;
 uniform float u_heightMultiplier;
 
+float getHeight(vec2 uv) {
+  float height = texture(u_terrainTex, uv).a;
+
+  return pow(2, (max(height, 0.4f) - 0.4f) * u_heightMultiplier) - 1.f;
+}
+
 void main() {
   float u = gl_TessCoord.x;
   float v = gl_TessCoord.y;
+  vec2 texeleSize = 1.f / textureSize(u_terrainTex, 0);
 
-  vec2 uv0 = uvsCoord[0];
-  vec2 uv1 = uvsCoord[1];
-  vec2 uv2 = uvsCoord[2];
-  vec2 uv3 = uvsCoord[3];
+  vec2 uv0 = mix(uvsCoord[0], uvsCoord[1], u);
+  vec2 uv1 = mix(uvsCoord[3], uvsCoord[2], u);
+  vec2 texCoord = mix(uv0, uv1, v);
+  vec2 chunkTexCoord = texCoord / u_chunks + u_chunkOffset;
 
-  vec2 leftUV  = uv0 + v * (uv3 - uv0);
-  vec2 rightUV = uv1 + v * (uv2 - uv1);
-  texCoord = leftUV + u * (rightUV - leftUV);
-  chunkTexCoord = texCoord / u_chunks + u_chunkOffset;
+  vec4 p0 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, u);
+  vec4 p1 = mix(gl_in[3].gl_Position, gl_in[2].gl_Position, u);
+  vec4 vertPos = mix(p0, p1, v);
 
-  vec4 pos0 = gl_in[0].gl_Position;
-  vec4 pos1 = gl_in[1].gl_Position;
-  vec4 pos2 = gl_in[2].gl_Position;
-  vec4 pos3 = gl_in[3].gl_Position;
+  float h = getHeight(chunkTexCoord);
+  float hR = getHeight(chunkTexCoord + vec2(texeleSize.x, 0.f));
+  float hT = getHeight(chunkTexCoord + vec2(0.f, texeleSize.y));
 
-  vec4 leftPos  = pos0 + v * (pos3 - pos0);
-  vec4 rightPos = pos1 + v * (pos2 - pos1);
-  vec4 pos = leftPos + u * (rightPos - leftPos);
+  vertPos.y += h;
 
-  float height = texture(u_terrainTex, chunkTexCoord).a;
-  height = pow(2, (max(height, 0.4f) - 0.4f) * u_heightMultiplier) - 1.f;
-  pos.y += height;
+  vec3 tangent = vec3(texeleSize.x, hR - h, 0.f);
+  vec3 bitangent = vec3(0.f, hT - h, texeleSize.y);
+  vec3 chunkNormal = normalize(cross(bitangent, tangent));
 
-  gl_Position = u_cam * pos;
+  dataOut.vertPos       = vertPos;
+  dataOut.texCoord      = texCoord;
+  dataOut.chunkTexCoord = chunkTexCoord;
+  dataOut.chunkNormal   = chunkNormal;
+
+  gl_Position = u_cam * vertPos;
 }
 

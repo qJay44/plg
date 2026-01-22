@@ -5,9 +5,22 @@
 
 class Shader {
 public:
-  [[nodiscard]] Shader();
-  [[nodiscard]] Shader(const fspath& vsPath, const fspath& fsPath, const fspath& gsPath = "");
-  [[nodiscard]] Shader(const fspath& vsPath, const fspath& fsPath, const fspath& tescPath, const fspath& tesePath);
+  Shader() = default;
+
+  [[nodiscard]] Shader(
+    const fspath& vsPath,
+    const fspath& fsPath,
+    const fspath& gsPath = ""
+  );
+
+  [[nodiscard]] Shader(
+    const fspath& vsPath,
+    const fspath& fsPath,
+    const fspath& tescPath,
+    const fspath& tesePath,
+    const fspath& gsPath = ""
+  );
+
   [[nodiscard]] Shader(const fspath& compPath);
 
   static void setDirectoryLocation(const fspath& path);
@@ -15,7 +28,6 @@ public:
   GLint getUniformLoc(const std::string& name) const;
 
   void use() const;
-  void clear();
 
   void setUniform1f(const GLint& loc, const GLfloat& n)    const;
   void setUniform2f(const GLint& loc, const vec2& v)       const;
