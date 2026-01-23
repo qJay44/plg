@@ -26,7 +26,7 @@ float getHeight(vec2 uv) {
 void main() {
   float u = gl_TessCoord.x;
   float v = gl_TessCoord.y;
-  vec2 texeleSize = 1.f / textureSize(u_terrainTex, 0);
+  vec2 texelSize = 1.f / textureSize(u_terrainTex, 0);
 
   vec2 uv0 = mix(uvsCoord[0], uvsCoord[1], u);
   vec2 uv1 = mix(uvsCoord[3], uvsCoord[2], u);
@@ -38,13 +38,13 @@ void main() {
   vec4 vertPos = mix(p0, p1, v);
 
   float h = getHeight(chunkTexCoord);
-  float hR = getHeight(chunkTexCoord + vec2(texeleSize.x, 0.f));
-  float hT = getHeight(chunkTexCoord + vec2(0.f, texeleSize.y));
+  float hR = getHeight(chunkTexCoord + vec2(texelSize.x, 0.f));
+  float hT = getHeight(chunkTexCoord + vec2(0.f, texelSize.y));
 
   vertPos.y += h;
 
-  vec3 tangent = vec3(texeleSize.x, hR - h, 0.f);
-  vec3 bitangent = vec3(0.f, hT - h, texeleSize.y);
+  vec3 tangent = vec3(texelSize.x, hR - h, 0.f);
+  vec3 bitangent = vec3(0.f, hT - h, texelSize.y);
   vec3 chunkNormal = normalize(cross(bitangent, tangent));
 
   dataOut.vertPos       = vertPos;

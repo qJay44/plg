@@ -15,6 +15,7 @@ static bool collapsed = true;
 
 u16 gui::fps = 1;
 Terrain* gui::terrainPtr = nullptr;
+Character* gui::characterPtr = nullptr;
 
 void gui::toggle() { collapsed = !collapsed; }
 
@@ -123,6 +124,14 @@ void gui::draw() {
 
       TreePop();
     }
+  }
+
+  if (CollapsingHeader("Character")) {
+    if (!characterPtr) error("[gui] The character is not linked to gui");
+    const vec3& pos = characterPtr->position;
+
+    TextColored({0.f, 1.f, 1.f, 1.f}, "Position");
+    Text("{%.2f, %.2f, %.2f}", pos.x, pos.y, pos.z);
   }
 
   if (CollapsingHeader("Falloff")) {

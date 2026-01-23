@@ -2,25 +2,61 @@
 
 #include "MapGenerator.hpp"
 #include "colormaps/jet.hpp"
+#include "utils/utils.hpp"
 
 Terrain::Terrain(vec3 pos) {
+  size_t dataSize = sharedMapGen.size.x * sharedMapGen.size.y * sizeof(float);
+  pbos[0] = PBO(1, nullptr, dataSize, GL_STREAM_READ);
+  pbos[1] = PBO(1, nullptr, dataSize, GL_STREAM_READ);
+
   update(pos, true);
 }
 
-void Terrain::update(vec3 pos, bool force) {
-  vec2 posOnChunk{pos.x, pos.z};
-  ivec2 coord00 = glm::floor(posOnChunk / chunkSize);
+void Terrain::update(const vec3& pos, bool force) {
+  vec2 posOnTerrainGlobal{pos.x, pos.z};
+  ivec2 currChunkMiddleCoord = glm::floor(posOnTerrainGlobal / chunkSize);
 
   if (autoChunkSize)
     chunkSize = sharedMapGen.size.x * 0.5f;
 
-  if ((chunk00Coord != coord00 && attachCam) || force) {
-    sharedMapGen.offset = coord00 * sharedMapGen.size.x;
+  if ((chunkMiddleCoord != currChunkMiddleCoord && attachCam) || force) {
+    sharedMapGen.offset = currChunkMiddleCoord * sharedMapGen.size.x;
     sharedMapGen.offset /= chunksPerAxis;
     sharedMapGen.offset.y *= -1.f;
     sharedMapGen.gen();
-    build(coord00);
+    build(currChunkMiddleCoord);
   }
+}
+
+float Terrain::getHeightAt(const vec3& pos) {
+  if (!attachCam)
+    return -9e9f;
+
+  float terrainSize = chunksPerAxis * chunkSize;
+  vec2 coord00f(chunkMiddleCoord - chunksFromMiddle);
+  vec2 posOnTerrainGlobal{pos.x, pos.z};
+  vec2 posOnTerrainLocal = posOnTerrainGlobal - coord00f * chunkSize;
+  vec2 posOnTerrainUV = posOnTerrainLocal / terrainSize;
+  posOnTerrainUV.y = 1.f - posOnTerrainUV.y;
+  ivec2 offset = ivec2(posOnTerrainUV * float(sharedMapGen.size.x));
+
+  pbos[writeIdx].bind();
+  glGetTextureSubImage(sharedMapGen.noiseTex.getId(), 0, offset.x, offset.y, 0, 1, 1, 1, GL_RED, GL_FLOAT, sizeof(float), 0);
+
+  pbos[readIdx].bind();
+  float* ptr = (float*)glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, sizeof(float), GL_MAP_READ_BIT);
+
+  if (!ptr)
+    error("[Terrain::getHeightAt] glMapBufferRange nullptr");
+
+  float height = pow(2, (fmax(*ptr, 0.4f) - 0.4f) * sharedMapGen.heightMultiplier) - 1.f;
+
+  glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+  PBO::unbind();
+  readIdx = !readIdx;
+  writeIdx = !writeIdx;
+
+  return height;
 }
 
 void Terrain::draw(const Camera* camera, const Shader& shader, bool forceNoWireframe) const {
@@ -50,21 +86,20 @@ void Terrain::draw(const Camera* camera, const Shader& shader, bool forceNoWiref
   sharedMapGen.terrainTex.unbind();
 }
 
-void Terrain::build(ivec2 coord00) {
+void Terrain::build(ivec2 middleCoord) {
   chunksTotal = chunksPerAxis * chunksPerAxis;
-  chunk00Coord = coord00;
+  chunkMiddleCoord = middleCoord;
+  chunksFromMiddle = chunksPerAxis / 2;
 
   if (chunks.size() != chunksTotal)
     chunks.resize(chunksTotal);
-
-  const int distFromMiddle = chunksPerAxis / 2; // offset to build around camera (centered)
 
   for (int i = 0; i < chunksPerAxis; i++) {
     for (int j = 0; j < chunksPerAxis; j++) {
       TerrainChunk& tc = chunks[j + i * chunksPerAxis];
 
       ivec2 coord = ivec2{j, chunksPerAxis - 1 - i};
-      vec2 chunkCoord = vec2(chunk00Coord + coord - distFromMiddle);
+      vec2 chunkCoord = vec2(chunkMiddleCoord + coord - chunksFromMiddle);
       vec2 chunkPos = chunkCoord * chunkSize;
       vec2 chunkCenterPos = chunkPos + chunkSize * 0.5f; // center of a chunk
 

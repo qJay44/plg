@@ -31,6 +31,7 @@ public:
   void setSpeedDefault(const float& s);
   void setSpeedMultiplier(const float& m);
   void setFov(float f);
+  void setPosition(const vec3& pos);
 
   void update();
 

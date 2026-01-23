@@ -37,6 +37,7 @@ void Camera::setFarPlane(const float& p)        { farPlane = p; }
 void Camera::setSpeedDefault(const float& s)    { speedDefult = s; speed = speedDefult * speedMul; }
 void Camera::setSpeedMultiplier(const float& m) { speedMul = m; speed = speedDefult * speedMul; };
 void Camera::setFov(float f)                    { fov = f; }
+void Camera::setPosition(const vec3& pos)       { position = pos; }
 
 void Camera::update() {
   vec2 winSize = global::getWinSize();

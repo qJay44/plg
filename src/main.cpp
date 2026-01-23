@@ -1,3 +1,4 @@
+#include "Character.hpp"
 #include "Terrain.hpp"
 #include <cassert>
 #include <cstdlib>
@@ -113,10 +114,11 @@ int main() {
   // ============================================================ //
 
   Mesh axis = meshes::axis(500000.f);
-
   Terrain terrain(camera->getPosition());
+  Character character(camera, &terrain);
 
   gui::terrainPtr = &terrain;
+  gui::characterPtr = &character;
 
   glEnable(GL_DEPTH_TEST);
 
@@ -156,6 +158,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     terrain.update(camera->getPosition());
+    character.update();
     terrain.draw(camera, global::drawNormals ? shaderMainNormals : shaderMain);
 
     if (global::drawGlobalAxis)
