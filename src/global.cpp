@@ -3,7 +3,6 @@
 namespace global {
 
 GLFWwindow* window = nullptr;
-Camera* camera = nullptr;
 
 float dt = 0.f;
 float time = 0.f;

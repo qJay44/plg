@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gl/mesh/meshes.hpp"
+#include "../gl/mesh/meshes.hpp"
 
 struct TerrainChunk : Mesh {
   TerrainChunk() = default;

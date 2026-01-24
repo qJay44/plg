@@ -3,12 +3,11 @@
 #include <string>
 
 #include "glm/gtc/type_ptr.hpp"
-#include "global.hpp"
+#include "../global.hpp"
 
 #include "imgui.h"
 
 using namespace ImGui;
-using global::camera;
 
 static const GLint swizzle[4] = {GL_RED, GL_RED, GL_RED, GL_ONE};
 static bool collapsed = true;
@@ -31,11 +30,11 @@ void gui::draw() {
 
   // ================== Camera ========================= //
 
+  Camera* camera = characterPtr->cam;
+
   if (CollapsingHeader("Camera")) {
     SliderFloat("Near", &camera->nearPlane, 0.01f, 1.f);
     SliderFloat("Far", &camera->farPlane, 10.f, 1000.f);
-    SliderFloat("Speed defulat", &camera->speedDefult, 1.f, 1000.f);
-    SliderFloat("Speed multiplier", &camera->speedMul, 1.f, 1000.f);
     SliderFloat("FOV", &camera->fov, 45.f, 179.f);
 
     Spacing();
@@ -55,7 +54,7 @@ void gui::draw() {
   bool reGenTex = false;
 
   if (CollapsingHeader("Noise texture")) {
-    // static float imgScale = 0.5f;
+    static float imgScale = 0.5f;
     static bool sq = true;
 
     reGenTex |= Checkbox("Width = Height", &sq);
@@ -79,13 +78,13 @@ void gui::draw() {
     reGenTex |= DragInt("Seed", &mg.seed, 0.1f);
     reGenTex |= DragFloat2("Offset", glm::value_ptr(mg.offset), 0.1f);
 
-    // Spacing();
-    // SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
+    Spacing();
+    SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
 
-    // mg.noiseTex.bind();
-    // glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
-    // Image(mg.noiseTex.getId(), vec2(mg.size) * imgScale);
-    // mg.noiseTex.unbind();
+    mg.noiseTex.bind();
+    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
+    Image(mg.noiseTex.getId(), vec2(mg.size) * imgScale);
+    mg.noiseTex.unbind();
   }
 
   // ================== Terrain ======================== //
@@ -126,28 +125,35 @@ void gui::draw() {
     }
   }
 
+  // ================== Character ====================== //
+
   if (CollapsingHeader("Character")) {
     if (!characterPtr) error("[gui] The character is not linked to gui");
     const vec3& pos = characterPtr->position;
+
+    SliderFloat("Speed defulat", &characterPtr->speedDefault, 1.f, 1000.f);
+    SliderFloat("Speed multiplier", &characterPtr->speedMul, 1.f, 1000.f);
 
     TextColored({0.f, 1.f, 1.f, 1.f}, "Position");
     Text("{%.2f, %.2f, %.2f}", pos.x, pos.y, pos.z);
   }
 
+  // ================== Falloff ======================== //
+
   if (CollapsingHeader("Falloff")) {
-    // static float imgScale = 0.5f;
+    static float imgScale = 0.5f;
 
     reGenTex |= Checkbox("Enable", &mg.useFalloffmap);
 
     BeginDisabled(!mg.useFalloffmap);
     reGenTex |= SliderFloat("Parameter a", &mg.falloffA, 0.01f, 20.f);
     reGenTex |= SliderFloat("Parameter b", &mg.falloffB, 0.01f, 20.f);
-    // SliderFloat("Image scale##2", &imgScale, 0.01f, 1.f);
+    SliderFloat("Image scale##2", &imgScale, 0.01f, 1.f);
 
-    // mg.falloffTex.bind();
-    // glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
-    // Image(mg.falloffTex.getId(), vec2(mg.size) * imgScale);
-    // mg.falloffTex.unbind();
+    mg.falloffTex.bind();
+    glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
+    Image(mg.falloffTex.getId(), vec2(mg.size) * imgScale);
+    mg.falloffTex.unbind();
 
     EndDisabled();
   }

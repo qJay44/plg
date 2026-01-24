@@ -7,7 +7,7 @@
 #include "VAO.hpp"
 #include "VBO.hpp"
 #include "EBO.hpp"
-#include "../Camera.hpp"
+#include "../../Camera.hpp"
 #include "../Shader.hpp"
 
 class Mesh : public Transformable {

@@ -1,5 +1,3 @@
-#include "Character.hpp"
-#include "Terrain.hpp"
 #include <cassert>
 #include <cstdlib>
 
@@ -15,11 +13,13 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "gl/Shader.hpp"
-#include "gl/Camera.hpp"
-#include "gl/InputsHandler.hpp"
-#include "gl/mesh/meshes.hpp"
-#include "gui.hpp"
+#include "engine/gl/Shader.hpp"
+#include "engine/gl/mesh/meshes.hpp"
+#include "engine/Camera.hpp"
+#include "engine/InputsHandler.hpp"
+#include "engine/gui.hpp"
+#include "engine/Character.hpp"
+#include "engine/terrain/Terrain.hpp"
 #include "utils/clrp.hpp"
 #include "global.hpp"
 
@@ -52,7 +52,6 @@ void GLAPIENTRY MessageCallback(
 int main() {
   CHDIR("../../../src");
   using global::window;
-  using global::camera;
 
   // GLFW init
   glfwInit();
@@ -63,7 +62,7 @@ int main() {
 
   // Globals
   window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
-  camera = new Camera({119.f, 283.f, 121.f}, {-0.11f, -0.88f, -0.32f}, 100.f);
+  Camera* camera = new Camera({119.f, 283.f, 121.f}, 0.f, 0.f);
   camera->setFarPlane(3000.f);
   camera->setSpeedDefault(100.f);
   camera->setFov(90.f);
@@ -99,7 +98,7 @@ int main() {
 
   // ===== Shaders ============================================== //
 
-  Shader::setDirectoryLocation("gl/shaders");
+  Shader::setDirectoryLocation("engine/gl/shaders");
   glPatchParameteri(GL_PATCH_VERTICES, 4);
 
   Shader shaderMain("main.vert", "main.frag", "main.tesc", "main.tese");
@@ -108,6 +107,7 @@ int main() {
 
   // ===== Inputs Handler ======================================= //
 
+  InputsHandler::mousePos = winCenter;
   glfwSetKeyCallback(window, InputsHandler::keyCallback);
   glfwSetCursorPosCallback(window, InputsHandler::cursorPosCallback);
 
@@ -139,7 +139,7 @@ int main() {
     global::time += global::dt;
 
     if (glfwGetWindowAttrib(window, GLFW_FOCUSED)) {
-      InputsHandler::process();
+      InputsHandler::process(character);
       camera->update();
     } else
       glfwSetCursorPos(window, winCenter.x, winCenter.y);

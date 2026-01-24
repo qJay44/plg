@@ -1,7 +1,7 @@
 #include "Terrain.hpp"
 
 #include "MapGenerator.hpp"
-#include "colormaps/jet.hpp"
+#include "../../colormaps/jet.hpp"
 #include "utils/utils.hpp"
 
 Terrain::Terrain(vec3 pos) {

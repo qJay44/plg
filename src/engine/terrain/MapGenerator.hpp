@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gl/texture/Texture.hpp"
+#include "../gl/texture/Texture.hpp"
 
 struct MapGenerator {
   Texture noiseTex{};

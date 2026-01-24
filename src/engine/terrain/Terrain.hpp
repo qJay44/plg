@@ -2,7 +2,7 @@
 
 #include "MapGenerator.hpp"
 #include "TerrainChunk.hpp"
-#include "gl/PBO.hpp"
+#include "../gl/PBO.hpp"
 
 class Terrain {
 public:

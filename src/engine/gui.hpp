@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Character.hpp"
-#include "Terrain.hpp"
+#include "terrain/Terrain.hpp"
 
 struct gui {
   static u16 fps;

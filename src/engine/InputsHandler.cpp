@@ -2,13 +2,13 @@
 
 #include <cassert>
 
-#include "../gui.hpp"
-#include "../global.hpp"
+#include "gui.hpp"
 
 #include "imgui_impl_glfw.h"
 
 using global::window;
-using global::camera;
+
+vec2 InputsHandler::mousePos{};
 
 void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   switch (key) {
@@ -45,27 +45,31 @@ void InputsHandler::keyCallback(GLFWwindow* window, int key, int scancode, int a
 }
 
 void InputsHandler::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
-  camera->moveByMouse({xpos, ypos});
+  mousePos = {xpos, ypos};
   ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 }
 
-void InputsHandler::process() {
+void InputsHandler::process(Moveable& entity) {
   if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
 
   if (!global::guiFocused) {
+    entity.moveByMouse(mousePos);
+
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-      camera->setSpeedMultiplier(5.f);
+      entity.setSpeedMultiplier(5.f);
     else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
-      camera->setSpeedMultiplier(1.f);
+      entity.setSpeedMultiplier(1.f);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera->moveForward();
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera->moveLeft();
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera->moveBack();
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera->moveRight();
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) entity.moveForward();
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) entity.moveLeft();
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) entity.moveBack();
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) entity.moveRight();
 
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera->moveUp();
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera->moveDown();
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) entity.moveUp();
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) entity.moveDown();
   }
+
+  mousePos = global::getWinCenter();
 }
 

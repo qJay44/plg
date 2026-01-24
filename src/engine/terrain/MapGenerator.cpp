@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <format>
 
-#include "gl/texture/image2D.hpp"
-#include "gl/Shader.hpp"
+#include "../gl/texture/image2D.hpp"
+#include "../gl/Shader.hpp"
 
 MapGenerator::MapGenerator(vec2 offset) : offset(offset) {
   gen();
