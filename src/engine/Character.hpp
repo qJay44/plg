@@ -3,31 +3,15 @@
 #include "Moveable.hpp"
 #include "terrain/Terrain.hpp"
 #include "Camera.hpp"
-#include "../global.hpp"
 
 class Character : public Moveable {
 public:
-  Character(Camera* camPtr, Terrain* terrainPtr)
-    : Moveable(camPtr->getPosition() - vec3{0.f, 5.f, 0.f}, camPtr->getYaw(), camPtr->getPitch()),
-      cam(camPtr), terrain(terrainPtr) {
-    speedDefault = 100.f;
-  }
+  Character() = delete;
+  Character(Camera* camPtr, Terrain* terrainPtr);
 
-  void update() {
-    position.y -= fallSpeed * fallAcc++ * global::dt;
+  bool isOnGround() const;
 
-    float terrainHeight = terrain->getHeightAt(position);
-    float heightDiff = position.y - terrainHeight;
-
-    if (heightDiff < 1.f) {
-      position.y += -heightDiff;
-      fallAcc = 1.f;
-    }
-
-    cam->setPosition(position + camOffset);
-    cam->setView(this);
-
-  }
+  void update();
 
 private:
   friend struct gui;
@@ -35,9 +19,16 @@ private:
   Camera* cam = nullptr;
   Terrain* terrain = nullptr;
 
+  vec3 naturalForward{};
   vec3 camOffset{0.f, 5.f, 0.f};
 
-  float fallSpeed = 1.f;
-  float fallAcc = 1.f;
+  vec3 velocity{};
+  float g = -9.8f;
+  float jumpStrength = 25.f;
+
+private:
+  void moveForward() override;
+  void moveBack() override;
+  void moveUp() override;
 };
 

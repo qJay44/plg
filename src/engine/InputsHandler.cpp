@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "gui.hpp"
+#include "../global.hpp"
 
 #include "imgui_impl_glfw.h"
 

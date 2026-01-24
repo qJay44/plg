@@ -25,10 +25,10 @@ void Moveable::setSpeedMultiplier(float n)   { speedMul     = n; speed = speedDe
 void Moveable::setPosition(const vec3& pos)  { position = pos; }
 
 void Moveable::setView(const Moveable* rhs) {
-  orientation = rhs->orientation;
   up = rhs->up;
   yaw = rhs->yaw;
   pitch = rhs->pitch;
+  orientation = rhs->orientation;
 }
 
 void Moveable::moveForward() { position +=  orientation * speed * global::dt; }
@@ -51,11 +51,10 @@ void Moveable::moveByMouse(vec2 mousePos) {
 }
 
 void Moveable::calcOrientation() {
-  vec3 o;
-  o.x = cos(yaw) * cos(pitch);
-  o.y = sin(pitch);
-  o.z = sin(yaw) * cos(pitch);
-
-  orientation = normalize(o);
+  orientation = normalize(vec3{
+    cos(yaw) * cos(pitch),
+    sin(pitch),
+    sin(yaw) * cos(pitch)
+  });
 }
 
