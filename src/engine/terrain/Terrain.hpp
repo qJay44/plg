@@ -10,7 +10,7 @@ public:
 
   void update(const vec3& pos, bool force = false);
   float getHeightAt(const vec3& pos);
-  void draw(const Camera* camera, const Shader& shader, bool forceNoWireframe = false) const;
+  void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
 
 private:
   friend struct gui;

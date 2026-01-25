@@ -47,6 +47,7 @@ void MapGenerator::gen() {
   constexpr uvec2 localSize(16); // NOTE: Must match in the shader
   const uvec2 numGroups = (uvec2(size) + localSize - 1u) / localSize;
 
+  falloffShader.use();
   falloffShader.setUniform1f("a", falloffA);
   falloffShader.setUniform1f("b", falloffB);
   falloffShader.setUniform1i("use", useFalloffmap);
@@ -55,6 +56,7 @@ void MapGenerator::gen() {
   glDispatchCompute(numGroups.x, numGroups.y, 1);
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+  noiseShader.use();
   noiseShader.setUniform1f("u_invScale", 1.f / std::max(scale, 0.01f));
   noiseShader.setUniform1f("u_persistance", persistance);
   noiseShader.setUniform1f("u_lacunarity", lacunarity);
@@ -67,6 +69,7 @@ void MapGenerator::gen() {
   glDispatchCompute(numGroups.x, numGroups.y, 1);
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+  terrainShader.use();
   for (const Region& r : regions) {
     terrainShader.setUniform1f(std::vformat(r.uniformFmt, std::make_format_args("Height")), r.height);
     terrainShader.setUniform3f(std::vformat(r.uniformFmt, std::make_format_args("Color")), r.color);

@@ -63,13 +63,14 @@ void Mesh::clear() {
   ebo.clear();
 }
 
-void Mesh::draw(const Camera* camera, const Shader& shader, bool forceNoWireframe) const {
+void Mesh::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
   assert(count);
 
   vao.bind();
 
   mat4 model = transMat * rotMat * scaleMat;
 
+  shader.use();
   shader.setUniform1f("u_camNear", camera->getNearPlane());
   shader.setUniform1f("u_camFar", camera->getFarPlane());
   shader.setUniform1f("u_camFov", camera->getFov());

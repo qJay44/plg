@@ -59,7 +59,7 @@ float Terrain::getHeightAt(const vec3& pos) {
   return height;
 }
 
-void Terrain::draw(const Camera* camera, const Shader& shader, bool forceNoWireframe) const {
+void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
   shader.setUniform1i("u_div", sharedMapGen.tescDiv);
   shader.setUniform1f("u_heightMultiplier", sharedMapGen.heightMultiplier);
   shader.setUniform1f("u_maskDebugColors", showChunks);

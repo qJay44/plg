@@ -18,7 +18,7 @@ public:
   ~Mesh();
 
   void clear();
-  void draw(const Camera* camera, const Shader& shader, bool forceNoWireframe = false) const;
+  void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
 
 private:
   GLsizei count = 0;
