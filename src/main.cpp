@@ -1,3 +1,4 @@
+#include "engine/Light.hpp"
 #include <cassert>
 #include <cstdlib>
 
@@ -62,7 +63,7 @@ int main() {
 
   // Globals
   window = glfwCreateWindow(INIT_WIDTH, INIT_HEIGHT, "MyProgram", NULL, NULL);
-  Camera* camera = new Camera({119.f, 283.f, 121.f}, 0.f, 0.f);
+  Camera* camera = new Camera({119.f, 83.f, 121.f}, 0.f, 0.f);
   camera->setFarPlane(3000.f);
   camera->setSpeedDefault(100.f);
   camera->setFov(90.f);
@@ -103,7 +104,7 @@ int main() {
 
   Shader shaderMain("main.vert", "main.frag", "main.tesc", "main.tese");
   Shader shaderMainNormals("main.vert", "main.frag", "main.tesc", "main.tese", "main.geom");
-  Shader shaderV4Color("v4_color.vert", "v4_color.frag");
+  Shader shaderColorPC("colorPC.vert", "colorPC.frag");
 
   // ===== Inputs Handler ======================================= //
 
@@ -114,11 +115,14 @@ int main() {
   // ============================================================ //
 
   Mesh axis = meshes::axis(500000.f);
+  Light light({0.f, 20.f, 0.f});
   Terrain terrain(camera->getPosition());
   Character character(camera, &terrain);
+  character.setSpeedDefault(25.f);
 
   gui::terrainPtr = &terrain;
   gui::characterPtr = &character;
+  gui::lightPtr = &light;
 
   glEnable(GL_DEPTH_TEST);
 
@@ -157,12 +161,17 @@ int main() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    shaderMain.setUniform3f("u_lightPos", light.getPosition());
+
+    light.update();
     terrain.update(camera->getPosition());
     character.update();
+
     terrain.draw(camera, global::drawNormals ? shaderMainNormals : shaderMain);
+    light.draw(camera, shaderColorPC);
 
     if (global::drawGlobalAxis)
-      axis.draw(camera, shaderV4Color);
+      axis.draw(camera, shaderColorPC);
 
     gui::draw();
     ImGui::Render();

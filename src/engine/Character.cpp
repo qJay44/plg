@@ -8,7 +8,6 @@
 Character::Character(Camera* camPtr, Terrain* terrainPtr)
   : Moveable(*camPtr),
     cam(camPtr), terrain(terrainPtr) {
-  speedDefault = 100.f;
   update();
 }
 
@@ -17,6 +16,7 @@ void Character::moveBack()    { position -= naturalForward * speed * global::dt;
 
 void Character::moveUp() {
   velocity.y += jumpStrength * isOnGround();
+  position.y += jumpStrength * flyMode * global::dt;
 }
 
 bool Character::isOnGround() const {
@@ -26,7 +26,7 @@ bool Character::isOnGround() const {
 void Character::update() {
   using global::dt;
   naturalForward = normalize(cross(up, getRight()));
-  velocity.y += g * dt;
+  velocity.y += flyMode ? 0.f : g * dt;
 
   position += velocity * dt;
 
@@ -34,7 +34,7 @@ void Character::update() {
   float nextHeight = position.y - terrainHeight;
 
   if (nextHeight < 0.f) {
-    position.y += -nextHeight;
+    position.y = terrainHeight;
     velocity.y = 0.f;
   }
 

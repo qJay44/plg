@@ -99,8 +99,47 @@ Mesh plane(size_t resolution, GLenum mode, bool autoClear) {
   return Mesh(vertices, indices, mode, autoClear);
 }
 
+Mesh cube(vec3 color, GLenum mode, bool autoClear) {
+  std::vector<VertexPC> vertices{
+    {{-1.f, -1.f,  1.f}, color},
+    {{-1.f,  1.f,  1.f}, color},
+    {{ 1.f,  1.f,  1.f}, color},
+    {{ 1.f, -1.f,  1.f}, color},
+    {{-1.f, -1.f, -1.f}, color},
+    {{-1.f,  1.f, -1.f}, color},
+    {{ 1.f,  1.f, -1.f}, color},
+    {{ 1.f, -1.f, -1.f}, color},
+  };
+
+  std::vector<GLuint> indices;
+
+  switch (mode) {
+    case GL_TRIANGLES: {
+      indices = {
+        0, 1, 2, //  Front face
+        2, 3, 0, //
+        4, 5, 6, //  Rear face
+        6, 7, 4, //
+        0, 1, 5, //  Left face
+        5, 4, 0, //
+        3, 2, 6, //  Right face
+        6, 7, 3, //
+        1, 5, 6, //  Top face
+        6, 2, 1, //
+        0, 4, 7, //  Bottom face
+        7, 3, 0, //
+      };
+      break;
+    }
+    default:
+      error("[meshes::plane] Unhandled mode [{}]", mode);
+  }
+
+  return Mesh(vertices, indices, mode, autoClear);
+}
+
 Mesh axis(float size, bool autoClear) {
-  std::vector<Vertex4> vertices{
+  std::vector<VertexPC> vertices{
     {{0.f, 0.f, 0.f} , global::red},
     {{size, 0.f, 0.f}, global::red},
     {{0.f, 0.f, 0.f} , global::green},

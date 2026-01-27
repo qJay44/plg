@@ -15,6 +15,7 @@ static bool collapsed = true;
 u16 gui::fps = 1;
 Terrain* gui::terrainPtr = nullptr;
 Character* gui::characterPtr = nullptr;
+Light* gui::lightPtr = nullptr;
 
 void gui::toggle() { collapsed = !collapsed; }
 
@@ -131,11 +132,18 @@ void gui::draw() {
     if (!characterPtr) error("[gui] The character is not linked to gui");
     const vec3& pos = characterPtr->position;
 
+    Checkbox("Fly mode", &characterPtr->flyMode);
     SliderFloat("Speed defulat", &characterPtr->speedDefault, 1.f, 1000.f);
     SliderFloat("Speed multiplier", &characterPtr->speedMul, 1.f, 1000.f);
 
     TextColored({0.f, 1.f, 1.f, 1.f}, "Position");
     Text("{%.2f, %.2f, %.2f}", pos.x, pos.y, pos.z);
+  }
+  // ================== Light ========================== //
+
+  if (CollapsingHeader("Light")) {
+    if (!lightPtr) error("[gui] The light is not linked to gui");
+    DragFloat3("Light position", glm::value_ptr(lightPtr->position));
   }
 
   // ================== Falloff ======================== //

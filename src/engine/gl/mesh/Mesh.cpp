@@ -52,6 +52,29 @@ Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& ind
   EBO::unbind();
 }
 
+Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
+  : count(indices.size()),
+    mode(mode),
+    autoClear(autoClear),
+    vao(VAO(1)),
+    vbo(VBO(1, vertices.data(), sizeof(vertices[0]) * vertices.size())),
+    ebo(1, indices.data(), sizeof(GLuint) * indices.size())
+{
+  vao.bind();
+  vbo.bind();
+  ebo.bind();
+
+  size_t typeSize = sizeof(float);
+  GLsizei stride = sizeof(vertices[0]);
+
+  vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
+  vao.linkAttrib(1, 3, GL_FLOAT, stride, (void*)(3 * typeSize));
+
+  VAO::unbind();
+  VBO::unbind();
+  EBO::unbind();
+}
+
 Mesh::~Mesh() {
   if (autoClear)
     clear();

@@ -64,9 +64,9 @@ void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) 
   shader.setUniform1f("u_heightMultiplier", sharedMapGen.heightMultiplier);
   shader.setUniform1f("u_maskDebugColors", showChunks);
   shader.setUniform1f("u_maskNormalmap", showChunkNormals);
-
-  shader.setUniformTexture(sharedMapGen.terrainTex);
   shader.setUniform2f("u_chunks", vec2(chunksPerAxis));
+  shader.setUniformTexture(sharedMapGen.terrainTex);
+
   sharedMapGen.terrainTex.bind();
 
   vec2 chunkOffsetStep(1.f / chunksPerAxis);

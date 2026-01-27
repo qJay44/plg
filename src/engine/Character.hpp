@@ -23,8 +23,10 @@ private:
   vec3 camOffset{0.f, 5.f, 0.f};
 
   vec3 velocity{};
-  float g = -9.8f;
-  float jumpStrength = 25.f;
+  float g = -30.f;
+  float jumpStrength = 15.f;
+
+  bool flyMode = true;
 
 private:
   void moveForward() override;
