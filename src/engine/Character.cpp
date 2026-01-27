@@ -15,8 +15,8 @@ void Character::moveForward() { position += naturalForward * speed * global::dt;
 void Character::moveBack()    { position -= naturalForward * speed * global::dt; }
 
 void Character::moveUp() {
-  velocity.y += jumpStrength * isOnGround();
-  position.y += jumpStrength * flyMode * global::dt;
+  velocity.y += jumpStrength * isOnGround() * !flyMode;
+  position.y += jumpStrength * speedMul * flyMode * global::dt;
 }
 
 bool Character::isOnGround() const {

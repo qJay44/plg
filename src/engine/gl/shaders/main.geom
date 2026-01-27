@@ -17,7 +17,7 @@ out DATA {
   vec3 chunkNormal;
 } dataOut;
 
-uniform mat4 u_cam;
+uniform mat4 u_camPV;
 
 void main() {
   for (int i = 0; i < 3; i++) {
@@ -26,7 +26,7 @@ void main() {
     dataOut.chunkTexCoord = dataIn[i].chunkTexCoord;
     dataOut.chunkNormal   = dataIn[i].chunkNormal;
 
-    gl_Position = u_cam * dataIn[i].vertPos;
+    gl_Position = u_camPV * dataIn[i].vertPos;
     EmitVertex();
 
     dataOut.vertPos       = dataIn[i].vertPos;
@@ -34,7 +34,7 @@ void main() {
     dataOut.chunkTexCoord = dataIn[i].chunkTexCoord;
     dataOut.chunkNormal   = dataIn[i].chunkNormal;
 
-    gl_Position = u_cam * (dataIn[i].vertPos + vec4(dataIn[i].chunkNormal, 0.f) * 2.f);
+    gl_Position = u_camPV * (dataIn[i].vertPos + vec4(dataIn[i].chunkNormal, 0.f) * 2.f);
     EmitVertex();
 
     EndPrimitive();

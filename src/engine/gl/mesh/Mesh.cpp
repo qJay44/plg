@@ -101,8 +101,9 @@ void Mesh::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) con
   shader.setUniform3f("u_camRight", camera->getRight());
   shader.setUniform3f("u_camUp", camera->getUp());
   shader.setUniform3f("u_camForward", camera->getForward());
-  shader.setUniformMatrix4f("u_cam", camera->getMatrix());
-  shader.setUniformMatrix4f("u_camInv", camera->getMatrixInverse());
+  shader.setUniformMatrix4f("u_camProj", camera->getProj());
+  shader.setUniformMatrix4f("u_camView", camera->getView());
+  shader.setUniformMatrix4f("u_camPV", camera->getProjView());
   shader.setUniformMatrix4f("u_model", model);
 
   if (global::drawWireframe & !forceNoWireframe)

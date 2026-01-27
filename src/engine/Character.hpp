@@ -24,7 +24,7 @@ private:
 
   vec3 velocity{};
   float g = -30.f;
-  float jumpStrength = 15.f;
+  float jumpStrength = 30.f;
 
   bool flyMode = true;
 

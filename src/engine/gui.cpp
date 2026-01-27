@@ -143,6 +143,7 @@ void gui::draw() {
 
   if (CollapsingHeader("Light")) {
     if (!lightPtr) error("[gui] The light is not linked to gui");
+    SliderFloat("Radius", &lightPtr->radius, 0.f, 30.f);
     DragFloat3("Light position", glm::value_ptr(lightPtr->position));
   }
 

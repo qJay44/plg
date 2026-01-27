@@ -5,11 +5,11 @@ layout(location = 1) in vec3 inColor;
 
 out vec3 color;
 
-uniform mat4 u_cam;
+uniform mat4 u_camPV;
 uniform mat4 u_model;
 
 void main() {
   color = inColor;
-  gl_Position = u_cam * u_model * vec4(inPos, 1.0f);
+  gl_Position = u_camPV * u_model * vec4(inPos, 1.0f);
 }
 

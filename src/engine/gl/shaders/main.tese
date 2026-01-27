@@ -14,7 +14,7 @@ out DATA {
 uniform sampler2D u_terrainTex;
 uniform vec2 u_chunks;
 uniform vec2 u_chunkOffset;
-uniform mat4 u_cam;
+uniform mat4 u_camPV;
 uniform float u_heightMultiplier;
 
 float getHeight(vec2 uv) {
@@ -52,6 +52,6 @@ void main() {
   dataOut.chunkTexCoord = chunkTexCoord;
   dataOut.chunkNormal   = chunkNormal;
 
-  gl_Position = u_cam * vertPos;
+  gl_Position = u_camPV * vertPos;
 }
 
