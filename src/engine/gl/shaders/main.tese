@@ -43,8 +43,9 @@ void main() {
 
   vertPos.y += h;
 
-  vec3 tangent = vec3(texelSize.x, hR - h, 0.f);
-  vec3 bitangent = vec3(0.f, hT - h, texelSize.y);
+  vec2 gridStep = vec2(1.f); // terrainWidth / textureSize(u_terrainTex, 0)
+  vec3 tangent = vec3(gridStep.x, hR - h, 0.f);
+  vec3 bitangent = vec3(0.f, hT - h, gridStep.y);
   vec3 chunkNormal = normalize(cross(bitangent, tangent));
 
   dataOut.vertPos       = vertPos;
