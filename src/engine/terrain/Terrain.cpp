@@ -1,8 +1,19 @@
 #include "Terrain.hpp"
 
+#include <cassert>
+#include <cmath>
+#include <format>
+#include <fstream>
+#include <sstream>
+#include <string>
+
 #include "MapGenerator.hpp"
 #include "../../colormaps/jet.hpp"
+#include "glm/common.hpp"
 #include "utils/utils.hpp"
+
+static const fspath regionsPath = "res/regions";
+constexpr const char* csvFormat = "cx,cy,cz,h";
 
 Terrain::Terrain(vec3 pos) {
   size_t dataSize = sharedMapGen.size.x * sharedMapGen.size.y * sizeof(float);
@@ -22,9 +33,62 @@ void Terrain::update(const vec3& pos, bool force) {
   if ((chunkMiddleCoord != currChunkMiddleCoord && attachCam) || force) {
     sharedMapGen.offset = currChunkMiddleCoord * sharedMapGen.size.x;
     sharedMapGen.offset /= chunksPerAxis;
+    sharedMapGen.offset += offset;
     sharedMapGen.offset.y *= -1.f;
     sharedMapGen.gen();
     build(currChunkMiddleCoord);
+  }
+}
+
+void Terrain::loadRegions(std::string_view name) {
+  fspath regionsFilePath = regionsPath / name;
+
+  std::ifstream f(regionsFilePath);
+
+  if (f.is_open()) {
+    std::string line;
+    f >> line;
+
+    if (line != csvFormat)
+      error("[Terrain::loadRegions] Got wrong format [{}]", line);
+
+    for (int i = 0; f >> line; i++) {
+      std::istringstream iss(line);
+      std::string valueStr;
+      vec4 ch;
+
+      for (int j = 0; std::getline(iss, valueStr, ','); j++) {
+        assert(j < 4);
+        ch[j] = std::stof(valueStr);
+      }
+
+      assert(i < TERRAIN_REGIONS);
+      colors[i] = vec3(ch);
+      heights[i] = ch.a;
+      regions = i + 1;
+    }
+  } else {
+    error("[Terrain::loadRegions] Could not open the file [{}]", regionsFilePath.string());
+  }
+
+}
+
+void Terrain::saveRegions(std::string_view name) const {
+  std::filesystem::create_directories(regionsPath);
+
+  fspath regionsFilePath = regionsPath / name;
+  std::ofstream f(regionsFilePath);
+
+  if (f.is_open()) {
+    f << csvFormat << "\n";
+    for (int i = 0; i < regions; i++) {
+      const vec3& c = colors[i];
+      const float& h = heights[i];
+      f << std::format("{},{},{},{}\n", c.x, c.y, c.z, h);
+    }
+    f.close();
+  } else {
+    error("[Terrain::saveRegions] Could not open the file [{}]", regionsFilePath.string());
   }
 }
 
@@ -49,7 +113,7 @@ float Terrain::getHeightAt(const vec3& pos) {
   if (!ptr)
     error("[Terrain::getHeightAt] glMapBufferRange nullptr");
 
-  float height = pow(2, (fmax(*ptr, 0.4f) - 0.4f) * sharedMapGen.heightMultiplier) - 1.f;
+  float height = calcHeight(*ptr);
 
   glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
   PBO::unbind();
@@ -60,14 +124,20 @@ float Terrain::getHeightAt(const vec3& pos) {
 }
 
 void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
-  shader.setUniform1i("u_div", sharedMapGen.tescDiv);
-  shader.setUniform1f("u_heightMultiplier", sharedMapGen.heightMultiplier);
+  shader.setUniform1i("u_div", tescDiv);
+  shader.setUniform1i("u_terrainRegions", regions);
+  shader.setUniform1f("u_heightMultiplier", heightMultiplier);
   shader.setUniform1f("u_maskDebugColors", showChunks);
   shader.setUniform1f("u_maskNormalmap", showChunkNormals);
+  shader.setUniform1f("u_maskFalloffmap", useFalloffmap);
+  shader.setUniform1f("u_minHeight", calcHeight(0.f));
+  shader.setUniform1f("u_maxHeight", calcHeight(1.f));
   shader.setUniform2f("u_chunks", vec2(chunksPerAxis));
-  shader.setUniformTexture(sharedMapGen.terrainTex);
+  shader.setUniform1fv("u_terrainHeights", regions, (GLfloat*)heights.data());
+  shader.setUniform3fv("u_terrainColors", regions, (GLfloat*)colors.data());
+  shader.setUniformTexture(sharedMapGen.noiseTex);
 
-  sharedMapGen.terrainTex.bind();
+  sharedMapGen.noiseTex.bind();
 
   vec2 chunkOffsetStep(1.f / chunksPerAxis);
 
@@ -83,7 +153,7 @@ void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) 
     }
   }
 
-  sharedMapGen.terrainTex.unbind();
+  sharedMapGen.noiseTex.unbind();
 }
 
 void Terrain::build(ivec2 middleCoord) {
@@ -107,5 +177,9 @@ void Terrain::build(ivec2 middleCoord) {
       tc = TerrainChunk(chunkResolution, {chunkCenterPos.x, 0.f, chunkCenterPos.y}, chunkSize);
     }
   }
+}
+
+float Terrain::calcHeight(float val) const {
+  return std::exp(val * heightMultiplier);
 }
 

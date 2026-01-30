@@ -1,7 +1,6 @@
 #include "MapGenerator.hpp"
 
 #include <algorithm>
-#include <format>
 
 #include "../gl/texture/image2D.hpp"
 #include "../gl/Shader.hpp"
@@ -11,9 +10,8 @@ MapGenerator::MapGenerator(vec2 offset) : offset(offset) {
 }
 
 void MapGenerator::gen() {
-  static Shader noiseShader("noise2d.comp");
-  static Shader terrainShader("terrain.comp");
   static Shader falloffShader("falloff.comp");
+  static Shader noiseShader("noise2d.comp");
 
   image2D mapImg;
   mapImg.width = size.x;
@@ -38,19 +36,12 @@ void MapGenerator::gen() {
   desc.unit = 1;
   noiseTex = Texture(mapImg, desc);
 
-  desc.uniformName = "u_terrainTex";
-  desc.unit = 2;
-  desc.internalFormat = GL_RGBA8; // color + height
-  terrainTex.clear();
-  terrainTex = Texture(mapImg, desc);
-
   constexpr uvec2 localSize(16); // NOTE: Must match in the shader
   const uvec2 numGroups = (uvec2(size) + localSize - 1u) / localSize;
 
   falloffShader.use();
   falloffShader.setUniform1f("a", falloffA);
   falloffShader.setUniform1f("b", falloffB);
-  falloffShader.setUniform1i("use", useFalloffmap);
 
   glBindImageTexture(0, falloffTex.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R8);
   glDispatchCompute(numGroups.x, numGroups.y, 1);
@@ -68,23 +59,10 @@ void MapGenerator::gen() {
   glBindImageTexture(1, noiseTex.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R8);
   glDispatchCompute(numGroups.x, numGroups.y, 1);
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-  terrainShader.use();
-  for (const Region& r : regions) {
-    terrainShader.setUniform1f(std::vformat(r.uniformFmt, std::make_format_args("Height")), r.height);
-    terrainShader.setUniform3f(std::vformat(r.uniformFmt, std::make_format_args("Color")), r.color);
-  }
-
-  glBindImageTexture(0, falloffTex.getId(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
-  glBindImageTexture(1, noiseTex.getId(), 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
-  glBindImageTexture(2, terrainTex.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
-  glDispatchCompute(numGroups.x, numGroups.y, 1);
-  glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
 void MapGenerator::clear() {
   falloffTex.clear();
   noiseTex.clear();
-  terrainTex.clear();
 }
 

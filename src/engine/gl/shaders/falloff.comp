@@ -6,7 +6,6 @@ layout(r8, binding = 0) writeonly uniform image2D imageWrite;
 
 uniform float a;
 uniform float b;
-uniform bool use;
 
 void main() {
   const ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
@@ -16,7 +15,6 @@ void main() {
   float x = max(d.x, d.y) / halfSize.x; // NOTE: Will look weird if halfSize.x != halfSize.y
   float xa = pow(x, a);
   float falloff = xa / (xa + pow(b - b * x, a));
-  falloff *= float(use);
 
   imageStore(imageWrite, texCoord, vec4(vec3(falloff), 1.f));
 }

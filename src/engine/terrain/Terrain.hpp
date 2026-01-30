@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <string_view>
+
 #include "MapGenerator.hpp"
 #include "TerrainChunk.hpp"
 #include "../gl/PBO.hpp"
@@ -9,7 +12,12 @@ public:
   Terrain(vec3 pos);
 
   void update(const vec3& pos, bool force = false);
+
+  void loadRegions(std::string_view name);
+  void saveRegions(std::string_view name) const;
+
   float getHeightAt(const vec3& pos);
+
   void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
 
 private:
@@ -24,6 +32,13 @@ private:
   std::vector<TerrainChunk> chunks;
 
   MapGenerator sharedMapGen{};
+  vec2 offset{};
+  float tescDiv = 64.f;
+  float heightMultiplier = 4.4f;
+
+  std::array<vec3, TERRAIN_REGIONS> colors;
+  std::array<float, TERRAIN_REGIONS> heights;
+  int regions = 0;
 
   PBO pbos[2];
   bool readIdx = false; // 0
@@ -33,8 +48,10 @@ private:
   bool showChunkNormals = false;
   bool attachCam = true;
   bool autoChunkSize = true;
+  bool useFalloffmap = false;
 
 private:
   void build(ivec2 middleCoord);
+  float calcHeight(float val) const;
 };
 

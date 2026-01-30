@@ -1,5 +1,6 @@
 #include "gui.hpp"
 
+#include <format>
 #include <string>
 
 #include "glm/gtc/type_ptr.hpp"
@@ -77,7 +78,7 @@ void gui::draw() {
     reGenTex |= SliderFloat("Noise max reduce", &mg.noiseMaxReducer, -5.f, 5.f);
     reGenTex |= SliderInt("Octaves", &mg.octaves, 1, 10);
     reGenTex |= DragInt("Seed", &mg.seed, 0.1f);
-    reGenTex |= DragFloat2("Offset", glm::value_ptr(mg.offset), 0.1f);
+    reGenTex |= DragFloat2("Offset", glm::value_ptr(terrainPtr->offset), 0.1f);
 
     Spacing();
     SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
@@ -91,8 +92,8 @@ void gui::draw() {
   // ================== Terrain ======================== //
 
   if (CollapsingHeader("Terrain")) {
-    SliderFloat("TESC divisions", &mg.tescDiv, 1.f, 1024.f);
-    SliderFloat("Height multiplier", &mg.heightMultiplier, 0.1f, 100.f);
+    SliderFloat("TESC divisions", &terrainPtr->tescDiv, 1.f, 1024.f);
+    SliderFloat("Height multiplier", &terrainPtr->heightMultiplier, 0.1f, 100.f);
 
     Checkbox("Colorize chunks", &terrainPtr->showChunks);
     Checkbox("Show chunk normals", &terrainPtr->showChunkNormals);
@@ -112,14 +113,28 @@ void gui::draw() {
     reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 2, 20);
 
     if (TreeNode("Regions")) {
-      for (size_t i = 0; i < mg.regions.size(); i++) {
-        std::string name = mg.regions[i].uniformFmt;
-        name.pop_back();
-        name.pop_back();
-        name = name.substr(2);
+      static char bufLoad[256]{"0"};
+      static char bufSave[256]{"0"};
 
-        reGenTex |= SliderFloat((name + " height").c_str(), &mg.regions[i].height, 0.f, 1.f);
-        reGenTex |= ColorEdit3((name + " color").c_str(), glm::value_ptr(mg.regions[i].color));
+      PushItemWidth(90.f);
+      InputText(".csv##0", bufLoad, sizeof(bufLoad));
+
+      SameLine();
+      if (Button("Load") && bufLoad[0])
+        terrainPtr->loadRegions(std::format("{}.csv", bufLoad));
+
+      InputText(".csv##1", bufSave, sizeof(bufSave));
+      PopItemWidth();
+
+      SameLine();
+      if (Button("Save") && bufSave[0])
+        terrainPtr->saveRegions(std::format("{}.csv", bufSave));
+
+      SliderInt("Count", &terrainPtr->regions, 0, TERRAIN_REGIONS);
+
+      for (int i = 0; i < terrainPtr->regions; i++) {
+        ColorEdit3(std::vformat("Color##{}", std::make_format_args(i)).c_str(), glm::value_ptr(terrainPtr->colors[i]));
+        SliderFloat(std::vformat("Height##{}", std::make_format_args(i)).c_str(), &terrainPtr->heights[i], 0.f, 1.f);
       }
 
       TreePop();
@@ -144,6 +159,7 @@ void gui::draw() {
   if (CollapsingHeader("Light")) {
     if (!lightPtr) error("[gui] The light is not linked to gui");
     SliderFloat("Radius", &lightPtr->radius, 0.f, 30.f);
+    ColorEdit3("Light color", glm::value_ptr(lightPtr->color));
     DragFloat3("Light position", glm::value_ptr(lightPtr->position));
   }
 
@@ -152,9 +168,9 @@ void gui::draw() {
   if (CollapsingHeader("Falloff")) {
     static float imgScale = 0.5f;
 
-    reGenTex |= Checkbox("Enable", &mg.useFalloffmap);
+    reGenTex |= Checkbox("Enable", &terrainPtr->useFalloffmap);
 
-    BeginDisabled(!mg.useFalloffmap);
+    BeginDisabled(!terrainPtr->useFalloffmap);
     reGenTex |= SliderFloat("Parameter a", &mg.falloffA, 0.01f, 20.f);
     reGenTex |= SliderFloat("Parameter b", &mg.falloffB, 0.01f, 20.f);
     SliderFloat("Image scale##2", &imgScale, 0.01f, 1.f);

@@ -4,12 +4,18 @@
 #include "gl/Shader.hpp"
 #include "gl/mesh/Mesh.hpp"
 #include "gl/mesh/meshes.hpp"
+#include "../global.hpp"
 
 class Light : public Mesh, public Moveable {
 public:
-  Light(vec3 pos, float meshScale = 1.f) : Mesh(meshes::plane()), Moveable(pos, 0.f, 0.f) {
+  Light(vec3 pos, float radius, vec3 color = vec3(1.f))
+    : Mesh(meshes::plane(2, GL_TRIANGLES, global::forward)), Moveable(pos, 0.f, 0.f), radius(radius), color(color) {
     translate(pos);
-    scale(meshScale);
+    scale(radius);
+  }
+
+  const vec3& getColor() const {
+    return color;
   }
 
   void update() {
@@ -17,8 +23,9 @@ public:
   }
 
   void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const {
-    shader.setUniform3f("u_pos", position);
     shader.setUniform1f("u_radius", radius);
+    shader.setUniform3f("u_pos", position);
+    shader.setUniform3f("u_col", color);
 
     glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
@@ -33,6 +40,7 @@ public:
 private:
   friend struct gui;
 
-  float radius = 15.f;
+  float radius;
+  vec3 color;
 };
 

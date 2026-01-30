@@ -1,11 +1,8 @@
 #version 460 core
 
 layout(location = 0) in vec3 inPos;
-layout(location = 1) in vec3 inColor;
-layout(location = 2) in vec2 inTex;
-layout(location = 3) in vec3 inNormal;
+layout(location = 1) in vec2 inTex;
 
-out vec3 color;
 out vec2 texCoord;
 
 uniform mat4 u_camProj;
@@ -14,7 +11,6 @@ uniform mat4 u_model;
 uniform float u_radius;
 
 void main() {
-  color = inColor;
   texCoord = inTex;
 
   vec3 worldPos = vec3(u_model * vec4(0.f, 0.f, 0.f, 1.f));

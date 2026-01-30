@@ -39,7 +39,7 @@ Mesh plane(vec3 color, GLenum mode, bool autoClear) {
   return Mesh(vertices, indices, mode, autoClear);
 }
 
-Mesh plane(size_t resolution, GLenum mode, bool autoClear) {
+Mesh plane(size_t resolution, GLenum mode, vec3 up, bool autoClear) {
   size_t indicesPerQuad = 0;
   if      (mode == GL_TRIANGLES) indicesPerQuad = 6;
   else if (mode == GL_PATCHES)   indicesPerQuad = 4;
@@ -47,7 +47,6 @@ Mesh plane(size_t resolution, GLenum mode, bool autoClear) {
 
   std::vector<VertexPT> vertices(resolution * resolution);
   std::vector<GLuint> indices((resolution - 1) * (resolution - 1) * indicesPerQuad);
-  constexpr vec3 up{0.f, 1.f, 0.f};
 
   vec3 axisA = vec3(up.y, up.z, up.x);
   vec3 axisB = cross(up, axisA);

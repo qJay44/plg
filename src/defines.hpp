@@ -9,3 +9,4 @@
 #define PI_6 (PI / 6.f)
 #define TAU (2.f * PI)
 
+#define TERRAIN_REGIONS 8

@@ -116,10 +116,14 @@ int main() {
   // ============================================================ //
 
   Mesh axis = meshes::axis(500000.f);
-  Light light({0.f, 200.f, 0.f});
+  Light light({0.f, 200.f, 0.f}, 15.f);
+
   Terrain terrain(camera->getPosition());
+  terrain.loadRegions("0.csv");
+
   Character character(camera, &terrain);
   character.setSpeedDefault(25.f);
+
 
   gui::terrainPtr = &terrain;
   gui::characterPtr = &character;
@@ -167,6 +171,7 @@ int main() {
     character.update();
 
     shaderMain.setUniform3f("u_lightPos", light.getPosition());
+    shaderMain.setUniform3f("u_lightColor", light.getColor());
 
     terrain.draw(camera, global::drawNormals ? shaderMainNormals : shaderMain);
     light.draw(camera, shaderLight);
