@@ -15,6 +15,7 @@ extern bool guiFocused;
 extern bool drawWireframe;
 extern bool drawNormals;
 extern bool drawGlobalAxis;
+extern bool drawEnvironmentalLight;
 
 inline ivec2 getWinSize() {
   ivec2 res;

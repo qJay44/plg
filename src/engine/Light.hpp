@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Camera.hpp"
 #include "Moveable.hpp"
 #include "gl/Shader.hpp"
 #include "gl/mesh/Mesh.hpp"
+#include "gl/mesh/VAO.hpp"
 #include "gl/mesh/meshes.hpp"
 #include "../global.hpp"
 
@@ -20,6 +22,22 @@ public:
 
   void update() {
     setTrans(position);
+  }
+
+  void drawEnvironment(const Camera* camera, Shader& shader) const {
+    static const VAO vao(1);
+
+    shader.use();
+    shader.setUniform3f("u_lightPos", position);
+    shader.setUniform3f("u_skyHorizonColor", skyHorizonColor);
+    shader.setUniform3f("u_skyZenithColor", skyZenithColor);
+    shader.setUniform3f("u_groundColor", groundColor);
+    shader.setUniform3f("u_camPos", camera->getPosition());
+    shader.setUniformMatrix4f("u_camInv", camera->getProjViewInv());
+
+    vao.bind();
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    vao.unbind();
   }
 
   void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const {
@@ -42,5 +60,9 @@ private:
 
   float radius;
   vec3 color;
+
+  vec3 skyHorizonColor = vec3(1.f);
+  vec3 skyZenithColor{0.289f, 0.565f, 1.f};
+  vec3 groundColor = vec3(0.637f);
 };
 

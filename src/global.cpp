@@ -11,6 +11,7 @@ bool guiFocused     = false;
 bool drawWireframe  = false;
 bool drawNormals    = false;
 bool drawGlobalAxis = false;
+bool drawEnvironmentalLight = false;
 
 }// global
 

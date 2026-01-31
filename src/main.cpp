@@ -106,6 +106,7 @@ int main() {
   Shader shaderMainNormals("main.vert", "main.frag", "main.tesc", "main.tese", "main.geom");
   Shader shaderColorPC("colorPC.vert", "colorPC.frag");
   Shader shaderLight("light.vert", "light.frag");
+  Shader shaderEnvironment("environment.vert", "environment.frag");
 
   // ===== Inputs Handler ======================================= //
 
@@ -124,12 +125,9 @@ int main() {
   Character character(camera, &terrain);
   character.setSpeedDefault(25.f);
 
-
   gui::terrainPtr = &terrain;
   gui::characterPtr = &character;
   gui::lightPtr = &light;
-
-  glEnable(GL_DEPTH_TEST);
 
   // Render loop
   while (!glfwWindowShouldClose(window)) {
@@ -166,6 +164,11 @@ int main() {
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    if (global::drawEnvironmentalLight) {
+      glDisable(GL_DEPTH_TEST);
+      light.drawEnvironment(camera, shaderEnvironment);
+    }
+
     light.update();
     terrain.update(camera->getPosition());
     character.update();
@@ -173,6 +176,7 @@ int main() {
     shaderMain.setUniform3f("u_lightPos", light.getPosition());
     shaderMain.setUniform3f("u_lightColor", light.getColor());
 
+    glEnable(GL_DEPTH_TEST);
     terrain.draw(camera, global::drawNormals ? shaderMainNormals : shaderMain);
     light.draw(camera, shaderLight);
 

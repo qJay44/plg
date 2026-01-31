@@ -19,6 +19,8 @@ public:
   const mat4&  getView()      const;
   const mat4&  getProjView()  const;
 
+  mat4 getProjViewInv() const;
+
   void setNearPlane(const float& p);
   void setFarPlane(const float& p);
   void setFov(float f);

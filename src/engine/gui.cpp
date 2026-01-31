@@ -159,8 +159,17 @@ void gui::draw() {
   if (CollapsingHeader("Light")) {
     if (!lightPtr) error("[gui] The light is not linked to gui");
     SliderFloat("Radius", &lightPtr->radius, 0.f, 30.f);
-    ColorEdit3("Light color", glm::value_ptr(lightPtr->color));
-    DragFloat3("Light position", glm::value_ptr(lightPtr->position));
+    ColorEdit3("Color", glm::value_ptr(lightPtr->color));
+    DragFloat3("Position", glm::value_ptr(lightPtr->position));
+
+    Spacing();
+    Checkbox("drawEnvironmental light", &global::drawEnvironmentalLight);
+
+    BeginDisabled(!global::drawEnvironmentalLight);
+    ColorEdit3("Horizon", glm::value_ptr(lightPtr->skyHorizonColor));
+    ColorEdit3("Zenith", glm::value_ptr(lightPtr->skyZenithColor));
+    ColorEdit3("Ground", glm::value_ptr(lightPtr->groundColor));
+    EndDisabled();
   }
 
   // ================== Falloff ======================== //

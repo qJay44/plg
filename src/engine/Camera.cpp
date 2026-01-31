@@ -5,6 +5,7 @@
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "../global.hpp"
+#include "glm/matrix.hpp"
 
 Camera::Camera(vec3 pos, float yaw, float pitch) : Moveable(pos, yaw, pitch) {
   update();
@@ -16,6 +17,8 @@ const float& Camera::getFov()       const { return fov;       }
 const mat4&  Camera::getProj()      const { return proj;      }
 const mat4&  Camera::getView()      const { return view;      }
 const mat4&  Camera::getProjView()  const { return pv;        }
+
+mat4 Camera::getProjViewInv() const { return glm::inverse(pv); }
 
 void Camera::setNearPlane(const float& p) { nearPlane = p; }
 void Camera::setFarPlane(const float& p)  { farPlane  = p; }
