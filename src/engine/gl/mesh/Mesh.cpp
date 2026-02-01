@@ -7,11 +7,11 @@
 Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
   : count(indices.size()),
     mode(mode),
-    autoClear(autoClear),
-    vao(VAO(1)),
-    vbo(VBO(1, vertices.data(), sizeof(vertices[0]) * vertices.size())),
-    ebo(1, indices.data(), sizeof(GLuint) * indices.size())
+    autoClear(autoClear)
 {
+  vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), GL_STATIC_DRAW);
+  ebo.allocate(indices.data(), sizeof(GLuint) * indices.size(), GL_STATIC_DRAW);
+
   vao.bind();
   vbo.bind();
   ebo.bind();
@@ -24,19 +24,19 @@ Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indi
   vao.linkAttrib(2, 2, GL_FLOAT, stride, (void*)(6 * typeSize));
   vao.linkAttrib(3, 3, GL_FLOAT, stride, (void*)(8 * typeSize));
 
-  VAO::unbind();
-  VBO::unbind();
-  EBO::unbind();
+  vao.unbind();
+  vbo.unbind();
+  ebo.unbind();
 }
 
 Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
   : count(indices.size()),
     mode(mode),
-    autoClear(autoClear),
-    vao(VAO(1)),
-    vbo(VBO(1, vertices.data(), sizeof(vertices[0]) * vertices.size())),
-    ebo(1, indices.data(), sizeof(GLuint) * indices.size())
+    autoClear(autoClear)
 {
+  vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), GL_STATIC_DRAW);
+  ebo.allocate(indices.data(), sizeof(GLuint) * indices.size(), GL_STATIC_DRAW);
+
   vao.bind();
   vbo.bind();
   ebo.bind();
@@ -47,19 +47,19 @@ Mesh::Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& ind
   vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
   vao.linkAttrib(1, 2, GL_FLOAT, stride, (void*)(3 * typeSize));
 
-  VAO::unbind();
-  VBO::unbind();
-  EBO::unbind();
+  vao.unbind();
+  vbo.unbind();
+  ebo.unbind();
 }
 
 Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
   : count(indices.size()),
     mode(mode),
-    autoClear(autoClear),
-    vao(VAO(1)),
-    vbo(VBO(1, vertices.data(), sizeof(vertices[0]) * vertices.size())),
-    ebo(1, indices.data(), sizeof(GLuint) * indices.size())
+    autoClear(autoClear)
 {
+  vbo.allocate(vertices.data(), sizeof(vertices[0]) * vertices.size(), GL_STATIC_DRAW);
+  ebo.allocate(indices.data(), sizeof(GLuint) * indices.size(), GL_STATIC_DRAW);
+
   vao.bind();
   vbo.bind();
   ebo.bind();
@@ -70,9 +70,9 @@ Mesh::Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& ind
   vao.linkAttrib(0, 3, GL_FLOAT, stride, (void*)(0 * typeSize));
   vao.linkAttrib(1, 3, GL_FLOAT, stride, (void*)(3 * typeSize));
 
-  VAO::unbind();
-  VBO::unbind();
-  EBO::unbind();
+  vao.unbind();
+  vbo.unbind();
+  ebo.unbind();
 }
 
 Mesh::~Mesh() {
@@ -87,8 +87,6 @@ void Mesh::clear() {
 }
 
 void Mesh::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
-  assert(count);
-
   vao.bind();
 
   mat4 model = transMat * rotMat * scaleMat;

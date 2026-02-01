@@ -25,7 +25,7 @@ public:
   }
 
   void drawEnvironment(const Camera* camera, Shader& shader) const {
-    static const VAO vao(1);
+    static const VAO vao;
 
     shader.use();
     shader.setUniform3f("u_lightPos", position);

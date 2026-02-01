@@ -9,4 +9,5 @@
 #define PI_6 (PI / 6.f)
 #define TAU (2.f * PI)
 
-#define TERRAIN_LAYERS 8
+#define TERRAIN_MAX_CHUNKS_PER_AXIS 10
+#define TERRAIN_MAX_LAYERS 8

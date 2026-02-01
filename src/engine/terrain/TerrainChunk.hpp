@@ -3,8 +3,8 @@
 #include "../gl/mesh/meshes.hpp"
 #include "../../global.hpp"
 
-struct TerrainChunk : Mesh {
-  TerrainChunk() = default;
+struct TerrainChunk : public Mesh {
+  TerrainChunk() : Mesh(meshes::plane(2, GL_PATCHES, global::up, false)) {}
 
   TerrainChunk(size_t resolution, vec3 pos, float size)
     : Mesh(meshes::plane(resolution, GL_PATCHES, global::up, false)) {

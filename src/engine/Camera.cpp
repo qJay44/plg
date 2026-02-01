@@ -20,6 +20,14 @@ const mat4&  Camera::getProjView()  const { return pv;        }
 
 mat4 Camera::getProjViewInv() const { return glm::inverse(pv); }
 
+mat4 Camera::getViewFlipped(const vec3& offset) const {
+  vec3 pos = position;
+  pos.y *= -1.f;
+  pos += offset;
+
+  return glm::lookAt(pos, pos + orientation, up);
+}
+
 void Camera::setNearPlane(const float& p) { nearPlane = p; }
 void Camera::setFarPlane(const float& p)  { farPlane  = p; }
 void Camera::setFov(float f)              { fov       = f; }

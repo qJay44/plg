@@ -110,7 +110,7 @@ void gui::draw() {
     reGenTex |= SliderFloat("Chunk size", &terrainPtr->chunkSize, 1.f, 512.f);
     EndDisabled();
 
-    reGenTex |= SliderInt("Chunks per axis", &terrainPtr->chunksPerAxis, 1, 10);
+    reGenTex |= SliderInt("Chunks per axis", &terrainPtr->chunksPerAxis, 1, TERRAIN_MAX_CHUNKS_PER_AXIS);
     reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 2, 20);
   }
 
@@ -134,7 +134,7 @@ void gui::draw() {
     if (Button("Save") && bufSave[0])
       terrainPtr->saveLayers(std::format("{}.json", bufSave));
 
-    SliderInt("Count", &terrainPtr->layersCount, 0, TERRAIN_LAYERS);
+    SliderInt("Count", &terrainPtr->layersCount, 0, TERRAIN_MAX_LAYERS);
     bool needUpdate = false;
 
     for (int i = 0; i < terrainPtr->layersCount; i++) {
@@ -173,7 +173,8 @@ void gui::draw() {
     DragFloat3("Position", glm::value_ptr(lightPtr->position));
 
     Spacing();
-    Checkbox("Draw environmental light", &global::drawEnvironmentalLight);
+    if (Checkbox("Draw environmental light", &global::drawEnvironmentalLight))
+      reGenTex = true;
 
     BeginDisabled(!global::drawEnvironmentalLight);
     ColorEdit3("Horizon", glm::value_ptr(lightPtr->skyHorizonColor));

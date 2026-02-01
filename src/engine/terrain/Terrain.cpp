@@ -16,20 +16,19 @@
 using json = nlohmann::json;
 
 Terrain::Terrain(vec3 pos, const std::string& layersName, const TextureDescriptor& desc) : layersName(layersName) {
-  ubo = UBO(1, layers.data(), sizeof(TerrainLayer) * TERRAIN_LAYERS);
+  ubo.allocate(layers, GL_DYNAMIC_DRAW);
 
   size_t dataSize = sharedMapGen.size.x * sharedMapGen.size.y * sizeof(float);
-  pbos[0] = PBO(1, nullptr, dataSize, GL_STREAM_READ);
-  pbos[1] = PBO(1, nullptr, dataSize, GL_STREAM_READ);
+  pbos[0].allocate(nullptr, dataSize, GL_STREAM_READ);
+  pbos[1].allocate(nullptr, dataSize, GL_STREAM_READ);
 
   layersTexture = Texture(fspath("res/tex/layers") / layersName, desc);
-  sharedMapGen.unitOffset = desc.unit + 1;
 
   update(pos, true);
 }
 
 void Terrain::updateLayers() {
-  ubo.update(layers.data(), sizeof(TerrainLayer) * TERRAIN_LAYERS);
+  ubo.update(layers, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT);
 }
 
 void Terrain::update(const vec3& pos, bool force) {
@@ -40,6 +39,7 @@ void Terrain::update(const vec3& pos, bool force) {
     chunkSize = sharedMapGen.size.x * 0.5f;
 
   if ((chunkMiddleCoord != currChunkMiddleCoord && attachCam) || force) {
+    chunksPerAxis = glm::min(chunksPerAxis, TERRAIN_MAX_CHUNKS_PER_AXIS);
     sharedMapGen.offset = currChunkMiddleCoord * sharedMapGen.size.x;
     sharedMapGen.offset /= chunksPerAxis;
     sharedMapGen.offset += offset;
@@ -110,7 +110,7 @@ void Terrain::saveLayers(std::string_view name) const {
 
 float Terrain::getHeightAt(const vec3& pos) {
   if (!attachCam)
-    return -9e9f;
+    return -1.f;
 
   float terrainSize = chunksPerAxis * chunkSize;
   vec2 coord00f(chunkMiddleCoord - chunksFromMiddle);
@@ -132,7 +132,6 @@ float Terrain::getHeightAt(const vec3& pos) {
   float height = calcHeight(*ptr);
 
   glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-  PBO::unbind();
   readIdx = !readIdx;
   writeIdx = !writeIdx;
 
@@ -151,7 +150,7 @@ void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) 
   shader.setUniform1f("u_maxHeight", calcHeight(1.f));
   shader.setUniform2f("u_chunks", vec2(chunksPerAxis));
 
-  ubo.bindPoint(0);
+  ubo.base(0);
   layersTexture.bind();
   sharedMapGen.falloffTex.bind();
   sharedMapGen.noiseTex.bind();
@@ -170,7 +169,6 @@ void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) 
     }
   }
 
-  ubo.unbindPoint(0);
   layersTexture.unbind();
   sharedMapGen.falloffTex.unbind();
   sharedMapGen.noiseTex.unbind();
@@ -180,9 +178,6 @@ void Terrain::build(ivec2 middleCoord) {
   chunksTotal = chunksPerAxis * chunksPerAxis;
   chunkMiddleCoord = middleCoord;
   chunksFromMiddle = chunksPerAxis / 2;
-
-  if (chunks.size() != chunksTotal)
-    chunks.resize(chunksTotal);
 
   for (int i = 0; i < chunksPerAxis; i++) {
     for (int j = 0; j < chunksPerAxis; j++) {

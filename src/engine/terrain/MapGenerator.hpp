@@ -17,10 +17,9 @@ struct MapGenerator {
   int octaves = 4;
   int seed = 1;
   vec2 offset{};
-  GLuint unitOffset = 0;
 
   MapGenerator() = default;
-  MapGenerator(vec2 offset, GLuint unitOffset);
+  MapGenerator(vec2 offset);
 
   void gen();
   void clear();

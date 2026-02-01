@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+  #include "../../../global.hpp"
 
 Texture::Texture(const fspath& path, const TextureDescriptor& d) : desc(d) {
   switch (desc.target) {
@@ -81,6 +82,7 @@ void Texture::create2D(const image2D& img) {
   glTexParameteri(desc.target, GL_TEXTURE_WRAP_S, desc.wrapS);
   glTexParameteri(desc.target, GL_TEXTURE_WRAP_T, desc.wrapT);
   glTexImage2D(desc.target, 0, desc.internalFormat, img.width, img.height, 0, desc.format, desc.type, img.pixels);
+  glGenerateMipmap(desc.target);
   unbind();
 }
 
@@ -111,6 +113,7 @@ void Texture::create2DArray(const fspath& folder) {
     assert(img0.channels == img.channels);
 
     glTexSubImage3D(desc.target, 0, 0, 0, i, img.width, img.height, 1, desc.format, desc.type, img.pixels);
+    glGenerateMipmap(desc.target);
   }
 
   unbind();

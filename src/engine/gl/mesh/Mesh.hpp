@@ -5,14 +5,12 @@
 #include "Vertex.hpp"
 #include "Transformable.hpp"
 #include "VAO.hpp"
-#include "VBO.hpp"
-#include "EBO.hpp"
+#include "../BufferObject.hpp"
 #include "../../Camera.hpp"
 #include "../Shader.hpp"
 
 class Mesh : public Transformable {
 public:
-  Mesh() = default;
   Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable);
   Mesh(const std::vector<VertexPT>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable);
   Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable);
@@ -26,7 +24,7 @@ private:
   GLenum mode;
   bool autoClear;
   VAO vao;
-  VBO vbo;
-  EBO ebo;
+  BufferObject vbo{GL_ARRAY_BUFFER};
+  BufferObject ebo{GL_ELEMENT_ARRAY_BUFFER};
 };
 

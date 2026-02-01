@@ -20,6 +20,7 @@ public:
   const mat4&  getProjView()  const;
 
   mat4 getProjViewInv() const;
+  mat4 getViewFlipped(const vec3& offset) const;
 
   void setNearPlane(const float& p);
   void setFarPlane(const float& p);

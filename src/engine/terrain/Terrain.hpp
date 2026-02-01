@@ -3,8 +3,6 @@
 #include <array>
 #include <string_view>
 
-#include "../gl/UBO.hpp"
-#include "../gl/PBO.hpp"
 #include "MapGenerator.hpp"
 #include "TerrainChunk.hpp"
 #include "TerrainLayer.hpp"
@@ -32,7 +30,7 @@ private:
   int chunksFromMiddle = chunksPerAxis / 2; // Offset to build around camera (centered)
   float chunkSize = 64.f;
   ivec2 chunkMiddleCoord{};
-  std::vector<TerrainChunk> chunks;
+  std::array<TerrainChunk, TERRAIN_MAX_CHUNKS_PER_AXIS> chunks;
 
   MapGenerator sharedMapGen{};
   vec2 offset{};
@@ -41,11 +39,11 @@ private:
 
   std::string layersName;
   Texture layersTexture;
-  std::array<TerrainLayer, TERRAIN_LAYERS> layers;
   int layersCount = 0;
-  UBO ubo;
+  std::array<TerrainLayer, TERRAIN_MAX_LAYERS> layers;
+  BufferObject ubo{GL_UNIFORM_BUFFER};
 
-  PBO pbos[2];
+  BufferObject pbos[2]{GL_PIXEL_PACK_BUFFER, GL_PIXEL_PACK_BUFFER};
   bool readIdx = false; // 0
   bool writeIdx = true; // 1
 
