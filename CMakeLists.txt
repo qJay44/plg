@@ -67,6 +67,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${IMGUI_PATH}/backends
   ${UTILS_PATH}/include
   ${LEGIT_PROFILER_PATH}/include
+  ${JSON_PATH}/include
 )
 
 target_link_directories(${PROJECT_NAME} PUBLIC

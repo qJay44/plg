@@ -3,18 +3,21 @@
 #include <array>
 #include <string_view>
 
+#include "../gl/UBO.hpp"
+#include "../gl/PBO.hpp"
 #include "MapGenerator.hpp"
 #include "TerrainChunk.hpp"
-#include "../gl/PBO.hpp"
+#include "TerrainLayer.hpp"
 
 class Terrain {
 public:
-  Terrain(vec3 pos);
+  Terrain(vec3 pos, const std::string& layersName, const TextureDescriptor& desc);
 
+  void updateLayers();
   void update(const vec3& pos, bool force = false);
 
-  void loadRegions(std::string_view name);
-  void saveRegions(std::string_view name) const;
+  void loadLayers(std::string_view name);
+  void saveLayers(std::string_view name) const;
 
   float getHeightAt(const vec3& pos);
 
@@ -36,19 +39,22 @@ private:
   float tescDiv = 64.f;
   float heightMultiplier = 4.4f;
 
-  std::array<vec3, TERRAIN_REGIONS> colors;
-  std::array<float, TERRAIN_REGIONS> heights;
-  int regions = 0;
+  std::string layersName;
+  Texture layersTexture;
+  std::array<TerrainLayer, TERRAIN_LAYERS> layers;
+  int layersCount = 0;
+  UBO ubo;
 
   PBO pbos[2];
   bool readIdx = false; // 0
   bool writeIdx = true; // 1
 
   bool showChunks = false;
-  bool showChunkNormals = false;
+  bool showChunkNormalmap = false;
   bool attachCam = true;
   bool autoChunkSize = true;
   bool useFalloffmap = false;
+  bool useLighting = true;
 
 private:
   void build(ivec2 middleCoord);

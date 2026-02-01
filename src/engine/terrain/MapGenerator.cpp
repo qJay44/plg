@@ -5,7 +5,7 @@
 #include "../gl/texture/image2D.hpp"
 #include "../gl/Shader.hpp"
 
-MapGenerator::MapGenerator(vec2 offset) : offset(offset) {
+MapGenerator::MapGenerator(vec2 offset, GLuint unitOffset) : offset(offset), unitOffset(unitOffset) {
   gen();
 }
 
@@ -18,8 +18,6 @@ void MapGenerator::gen() {
   mapImg.height = size.y;
 
   TextureDescriptor desc;
-  desc.unit = 0;
-  desc.target = GL_TEXTURE_2D;
   desc.internalFormat = GL_R8;
   desc.minFilter = GL_NEAREST;
   desc.magFilter = GL_NEAREST;
@@ -27,13 +25,13 @@ void MapGenerator::gen() {
   desc.wrapT = GL_CLAMP_TO_EDGE;
 
   desc.uniformName = "u_falloffTex";
-  desc.unit = 0;
+  desc.unit = unitOffset;
   falloffTex.clear();
   falloffTex = Texture(mapImg, desc);
 
   noiseTex.clear();
   desc.uniformName = "u_noiseTex";
-  desc.unit = 1;
+  desc.unit = 1 + unitOffset;
   noiseTex = Texture(mapImg, desc);
 
   constexpr uvec2 localSize(16); // NOTE: Must match in the shader

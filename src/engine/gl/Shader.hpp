@@ -1,9 +1,9 @@
 #pragma once
 
-#include "texture/Texture.hpp"
 #include <string>
-#include <string_view>
 #include <unordered_map>
+
+#include "texture/Texture.hpp"
 
 class Shader {
 public:
@@ -54,9 +54,6 @@ public:
   void setUniform1fv(const std::string& name, GLsizei count, const float* v);
   void setUniform3fv(const std::string& name, GLsizei count, const float* v);
   void setUniformMatrix4f(const std::string& name, const mat4& m);
-
-  void setUniformTexture(const GLint& loc, const Texture& texture);
-  void setUniformTexture(const Texture& texture);
 
 private:
   static fspath directory;

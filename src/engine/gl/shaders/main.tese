@@ -11,8 +11,9 @@ out DATA {
   vec3 chunkNormal;
 } dataOut;
 
-uniform sampler2D u_noiseTex;
-uniform sampler2D u_falloffTex;
+layout(binding = 1) uniform sampler2D u_falloffTex;
+layout(binding = 2) uniform sampler2D u_noiseTex;
+
 uniform vec2 u_chunks;
 uniform vec2 u_chunkOffset;
 uniform mat4 u_camPV;

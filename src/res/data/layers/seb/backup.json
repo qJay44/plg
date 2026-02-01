@@ -1,0 +1,51 @@
+[
+  {
+    "tint": [0.11, 0.27, 0.63],
+    "tintStrength": 0.5,
+    "startHeight": 0,
+    "blendStrength": 0.134,
+    "textureScale": 0.007
+  },
+  {
+    "tint": [0.22, 0.38, 0.74],
+    "tintStrength": 0.5,
+    "startHeight": 0.051,
+    "blendStrength": 0.083,
+    "textureScale": 0.007
+  },
+  {
+    "tint": [0.81, 0.85, 0.48],
+    "tintStrength": 0.5,
+    "startHeight": 0.091,
+    "blendStrength": 0.056,
+    "textureScale": 0.007
+  },
+  {
+    "tint": [0.35, 0.65, 0.1],
+    "tintStrength": 0.5,
+    "startHeight": 0.153,
+    "blendStrength": 0.102,
+    "textureScale": 0.007
+  },
+  {
+    "tint": [0.25, 0.55, 0.09],
+    "tintStrength": 0.5,
+    "startHeight": 0.34,
+    "blendStrength": 0.41,
+    "textureScale": 0.007
+  },
+  {
+    "tint": [0.35, 0.25, 0.24],
+    "tintStrength": 0.5,
+    "startHeight": 0.459,
+    "blendStrength": 0.185,
+    "textureScale": 0.007
+  },
+  {
+    "tint": [1, 1, 1],
+    "tintStrength": 0.5,
+    "startHeight": 0.828,
+    "blendStrength": 0.391,
+    "textureScale": 0.007
+  }
+]

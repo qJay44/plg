@@ -93,14 +93,6 @@ void Shader::setUniform1fv(const std::string& name, GLsizei count, const GLfloat
 void Shader::setUniform3fv(const std::string& name, GLsizei count, const GLfloat* v) { setUniform3fv(getUniformLoc(name), count, v); }
 void Shader::setUniformMatrix4f(const std::string& name, const mat4& m) { setUniformMatrix4f(getUniformLoc(name), m); }
 
-void Shader::setUniformTexture(const GLint& loc, const Texture& texture) {
-  glProgramUniform1i(program, loc, texture.getUnit());
-}
-
-void Shader::setUniformTexture(const Texture& texture) {
-  setUniformTexture(getUniformLoc(texture.getUniformName()), texture);
-}
-
 GLuint Shader::load(fspath path, int type) {
   path = directory.empty() ? path : directory / path;
   std::string shaderStr = readFile(path);

@@ -1,6 +1,7 @@
 #version 460 core
 
-#define TERRAIN_REGIONS 8 // NOTE: Must match on the CPU side
+#define TERRAIN_LAYERS 8 // NOTE: Must match on the CPU side
+#define EPSILON 1e-4f
 
 in DATA {
   vec4 vertPos;
@@ -11,21 +12,33 @@ in DATA {
 
 out vec4 FragColor;
 
-uniform sampler2D u_noiseTex;
+struct TerrainLayer {
+  vec3 tint;
+  float tintStrength;
+  float startHeight;
+  float blendStrength;
+  float textureScale;
+};
+
+layout (std140, binding = 0) uniform TerrainLayersBlock {
+  TerrainLayer u_terrainLayers[TERRAIN_LAYERS];
+};
+
+layout(binding = 0) uniform sampler2DArray u_terrainLayersTex;
+
 uniform vec3 u_chunkDebugColor;
 uniform vec3 u_lightPos;
 uniform vec3 u_lightColor;
 uniform vec3 u_camPos;
 uniform vec3 u_camForward;
-uniform vec3 u_terrainColors[TERRAIN_REGIONS];
+uniform float u_useLighting;
 uniform float u_sunFocus;
 uniform float u_sunIntensity;
 uniform float u_maskDebugColors;
 uniform float u_maskNormalmap;
 uniform float u_minHeight;
 uniform float u_maxHeight;
-uniform float u_terrainHeights[TERRAIN_REGIONS];
-uniform int u_terrainRegions;
+uniform int u_terrainLayersCount;
 
 vec3 directionalLight() {
   vec3 lightDir = normalize(u_lightPos - dataIn.vertPos.xyz);
@@ -42,22 +55,38 @@ vec3 directionalLight() {
 }
 
 float inverseLerp(float a, float b, float n) {
-  return (n - a) / (b - a);
+  return clamp((n - a) / (b - a), 0.f, 1.f);
+}
+
+vec3 triplanarSample(int i) {
+  vec3 scaledVertPos = dataIn.vertPos.xyz * u_terrainLayers[i].textureScale;
+  vec3 blendAxis = abs(dataIn.chunkNormal);
+  vec3 xProj = texture(u_terrainLayersTex, vec3(scaledVertPos.yz, i)).rgb * blendAxis.x;
+  vec3 yProj = texture(u_terrainLayersTex, vec3(scaledVertPos.xz, i)).rgb * blendAxis.y;
+  vec3 zProj = texture(u_terrainLayersTex, vec3(scaledVertPos.xy, i)).rgb * blendAxis.z;
+
+  return xProj + yProj + zProj;
 }
 
 void main() {
-  vec3 col = vec3(texture(u_noiseTex, dataIn.chunkTexCoord).r);
-  float height = inverseLerp(u_minHeight, u_maxHeight, dataIn.vertPos.y);
+  vec3 col = vec3(0.f);
+  float height = smoothstep(u_minHeight, u_maxHeight, dataIn.vertPos.y);
 
-  for (int i = 0; i < u_terrainRegions; i++) {
-    float drawStrength = max(sign(height - u_terrainHeights[i]), 0.f);
-    col = col * (1.f - drawStrength) + u_terrainColors[i] * drawStrength;
+  for (int i = 0; i < u_terrainLayersCount; i++) {
+    TerrainLayer terrainLayer = u_terrainLayers[i];
+    float b = terrainLayer.blendStrength;
+    float drawStrength = smoothstep(-b * 0.5f - EPSILON, b * 0.5f, height - terrainLayer.startHeight);
+
+    vec3 baseColor = terrainLayer.tint * terrainLayer.tintStrength;
+    vec3 textureColor = triplanarSample(i) * (1.f - terrainLayer.tintStrength);
+
+    col = col * (1.f - drawStrength) + (baseColor + textureColor) * drawStrength;
   }
 
   col = col * (1.f - u_maskDebugColors) + u_chunkDebugColor * u_maskDebugColors;
   col = col * (1.f - u_maskNormalmap) + (dataIn.chunkNormal * 0.5f + 0.5f) * u_maskNormalmap;
 
-  col *= directionalLight();
+  col = col * directionalLight() * u_useLighting + col * (1.f - u_useLighting);
 
   FragColor = vec4(col, 1.f);
 }

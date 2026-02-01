@@ -1,4 +1,5 @@
 #include "engine/Light.hpp"
+#include "engine/gl/texture/TextureDescriptor.hpp"
 #include <cassert>
 #include <cstdlib>
 
@@ -119,8 +120,13 @@ int main() {
   Mesh axis = meshes::axis(500000.f);
   Light light({0.f, 200.f, 0.f}, 15.f);
 
-  Terrain terrain(camera->getPosition());
-  terrain.loadRegions("0.csv");
+  TextureDescriptor terrainTexDesc;
+  terrainTexDesc.uniformName = "u_terrainLayersTex";
+  terrainTexDesc.target = GL_TEXTURE_2D_ARRAY;
+  terrainTexDesc.unit = 0;
+
+  Terrain terrain(camera->getPosition(), "seb", terrainTexDesc);
+  terrain.loadLayers("0.json");
 
   Character character(camera, &terrain);
   character.setSpeedDefault(25.f);

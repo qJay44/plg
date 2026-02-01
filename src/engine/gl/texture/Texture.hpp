@@ -33,6 +33,7 @@ private:
   GLuint id = 0;
 
 private:
-  void create(const image2D& img);
+  void create2D(const image2D& img);
+  void create2DArray(const fspath& folder);
 };
 

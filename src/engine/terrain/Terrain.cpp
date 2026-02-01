@@ -2,25 +2,34 @@
 
 #include <cassert>
 #include <cmath>
-#include <format>
 #include <fstream>
-#include <sstream>
+#include <iomanip>
+#include <ostream>
 #include <string>
 
 #include "MapGenerator.hpp"
 #include "../../colormaps/jet.hpp"
 #include "glm/common.hpp"
 #include "utils/utils.hpp"
+#include "nlohmann/json.hpp"
 
-static const fspath regionsPath = "res/regions";
-constexpr const char* csvFormat = "cx,cy,cz,h";
+using json = nlohmann::json;
 
-Terrain::Terrain(vec3 pos) {
+Terrain::Terrain(vec3 pos, const std::string& layersName, const TextureDescriptor& desc) : layersName(layersName) {
+  ubo = UBO(1, layers.data(), sizeof(TerrainLayer) * TERRAIN_LAYERS);
+
   size_t dataSize = sharedMapGen.size.x * sharedMapGen.size.y * sizeof(float);
   pbos[0] = PBO(1, nullptr, dataSize, GL_STREAM_READ);
   pbos[1] = PBO(1, nullptr, dataSize, GL_STREAM_READ);
 
+  layersTexture = Texture(fspath("res/tex/layers") / layersName, desc);
+  sharedMapGen.unitOffset = desc.unit + 1;
+
   update(pos, true);
+}
+
+void Terrain::updateLayers() {
+  ubo.update(layers.data(), sizeof(TerrainLayer) * TERRAIN_LAYERS);
 }
 
 void Terrain::update(const vec3& pos, bool force) {
@@ -40,55 +49,62 @@ void Terrain::update(const vec3& pos, bool force) {
   }
 }
 
-void Terrain::loadRegions(std::string_view name) {
-  fspath regionsFilePath = regionsPath / name;
+void Terrain::loadLayers(std::string_view name) {
+  fspath path = fspath("res/data/layers") / layersName / name;
 
-  std::ifstream f(regionsFilePath);
-
-  if (f.is_open()) {
-    std::string line;
-    f >> line;
-
-    if (line != csvFormat)
-      error("[Terrain::loadRegions] Got wrong format [{}]", line);
-
-    for (int i = 0; f >> line; i++) {
-      std::istringstream iss(line);
-      std::string valueStr;
-      vec4 ch;
-
-      for (int j = 0; std::getline(iss, valueStr, ','); j++) {
-        assert(j < 4);
-        ch[j] = std::stof(valueStr);
-      }
-
-      assert(i < TERRAIN_REGIONS);
-      colors[i] = vec3(ch);
-      heights[i] = ch.a;
-      regions = i + 1;
-    }
-  } else {
-    error("[Terrain::loadRegions] Could not open the file [{}]", regionsFilePath.string());
-  }
-
-}
-
-void Terrain::saveRegions(std::string_view name) const {
-  std::filesystem::create_directories(regionsPath);
-
-  fspath regionsFilePath = regionsPath / name;
-  std::ofstream f(regionsFilePath);
+  std::ifstream f(path);
 
   if (f.is_open()) {
-    f << csvFormat << "\n";
-    for (int i = 0; i < regions; i++) {
-      const vec3& c = colors[i];
-      const float& h = heights[i];
-      f << std::format("{},{},{},{}\n", c.x, c.y, c.z, h);
+    json data = json::parse(f);
+    layersCount = data.size();
+
+    for (size_t i = 0; i < data.size(); i++) {
+      TerrainLayer& l = layers[i];
+      const auto& d = data[i];
+
+      l.tint          = glm::vec3(d["tint"][0], d["tint"][1], d["tint"][2]);
+      l.tintStrength  = d["tintStrength"];
+      l.startHeight   = d["startHeight"];
+      l.blendStrength = d["blendStrength"];
+      l.textureScale  = d["textureScale"];
     }
+
     f.close();
   } else {
-    error("[Terrain::saveRegions] Could not open the file [{}]", regionsFilePath.string());
+    warning("[Terrain::loadRegions] Could not open the file [{}]", path.string());
+  }
+
+  updateLayers();
+}
+
+void Terrain::saveLayers(std::string_view name) const {
+  fspath path = fspath("res/data/layers") / layersName / name;
+
+  std::ofstream f(path);
+
+  if (f.is_open()) {
+    json data = json::array();
+
+    for (int i = 0; i < layersCount; i++) {
+      const TerrainLayer& l = layers[i];
+      json d;
+
+      d["tint"][0] = l.tint.x;
+      d["tint"][1] = l.tint.y;
+      d["tint"][2] = l.tint.z;
+
+      d["tintStrength"]  = l.tintStrength;
+      d["startHeight"]   = l.startHeight;
+      d["blendStrength"] = l.blendStrength;
+      d["textureScale"]  = l.textureScale;
+
+      data.push_back(d);
+    }
+
+    f << std::setw(2) << data << std::endl;
+    f.close();
+  } else {
+    error("[Terrain::saveRegions] Could not open the file [{}]", path.string());
   }
 }
 
@@ -125,18 +141,19 @@ float Terrain::getHeightAt(const vec3& pos) {
 
 void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
   shader.setUniform1i("u_div", tescDiv);
-  shader.setUniform1i("u_terrainRegions", regions);
+  shader.setUniform1i("u_terrainLayersCount", layersCount);
+  shader.setUniform1f("u_useLighting", useLighting);
   shader.setUniform1f("u_heightMultiplier", heightMultiplier);
   shader.setUniform1f("u_maskDebugColors", showChunks);
-  shader.setUniform1f("u_maskNormalmap", showChunkNormals);
+  shader.setUniform1f("u_maskNormalmap", showChunkNormalmap);
   shader.setUniform1f("u_maskFalloffmap", useFalloffmap);
   shader.setUniform1f("u_minHeight", calcHeight(0.f));
   shader.setUniform1f("u_maxHeight", calcHeight(1.f));
   shader.setUniform2f("u_chunks", vec2(chunksPerAxis));
-  shader.setUniform1fv("u_terrainHeights", regions, (GLfloat*)heights.data());
-  shader.setUniform3fv("u_terrainColors", regions, (GLfloat*)colors.data());
-  shader.setUniformTexture(sharedMapGen.noiseTex);
 
+  ubo.bindPoint(0);
+  layersTexture.bind();
+  sharedMapGen.falloffTex.bind();
   sharedMapGen.noiseTex.bind();
 
   vec2 chunkOffsetStep(1.f / chunksPerAxis);
@@ -153,6 +170,9 @@ void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) 
     }
   }
 
+  ubo.unbindPoint(0);
+  layersTexture.unbind();
+  sharedMapGen.falloffTex.unbind();
   sharedMapGen.noiseTex.unbind();
 }
 

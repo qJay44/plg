@@ -95,8 +95,9 @@ void gui::draw() {
     SliderFloat("TESC divisions", &terrainPtr->tescDiv, 1.f, 1024.f);
     SliderFloat("Height multiplier", &terrainPtr->heightMultiplier, 0.1f, 100.f);
 
+    Checkbox("Use lighting", &terrainPtr->useLighting);
     Checkbox("Colorize chunks", &terrainPtr->showChunks);
-    Checkbox("Show chunk normals", &terrainPtr->showChunkNormals);
+    Checkbox("Show chunk normalmap", &terrainPtr->showChunkNormalmap);
     Checkbox("Attach camera", &terrainPtr->attachCam);
 
     Checkbox("Auto chunk size", &terrainPtr->autoChunkSize);
@@ -111,34 +112,43 @@ void gui::draw() {
 
     reGenTex |= SliderInt("Chunks per axis", &terrainPtr->chunksPerAxis, 1, 10);
     reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 2, 20);
+  }
 
-    if (TreeNode("Regions")) {
-      static char bufLoad[256]{"0"};
-      static char bufSave[256]{"0"};
+  // ================== Layers ========================= //
 
-      PushItemWidth(90.f);
-      InputText(".csv##0", bufLoad, sizeof(bufLoad));
+  if (CollapsingHeader("Layers")) {
+    static char bufLoad[256]{"0"};
+    static char bufSave[256]{"0"};
 
-      SameLine();
-      if (Button("Load") && bufLoad[0])
-        terrainPtr->loadRegions(std::format("{}.csv", bufLoad));
+    PushItemWidth(90.f);
+    InputText(".json##0", bufLoad, sizeof(bufLoad));
 
-      InputText(".csv##1", bufSave, sizeof(bufSave));
-      PopItemWidth();
+    SameLine();
+    if (Button("Load") && bufLoad[0])
+      terrainPtr->loadLayers(std::format("{}.json", bufLoad));
 
-      SameLine();
-      if (Button("Save") && bufSave[0])
-        terrainPtr->saveRegions(std::format("{}.csv", bufSave));
+    InputText(".json##1", bufSave, sizeof(bufSave));
+    PopItemWidth();
 
-      SliderInt("Count", &terrainPtr->regions, 0, TERRAIN_REGIONS);
+    SameLine();
+    if (Button("Save") && bufSave[0])
+      terrainPtr->saveLayers(std::format("{}.json", bufSave));
 
-      for (int i = 0; i < terrainPtr->regions; i++) {
-        ColorEdit3(std::vformat("Color##{}", std::make_format_args(i)).c_str(), glm::value_ptr(terrainPtr->colors[i]));
-        SliderFloat(std::vformat("Height##{}", std::make_format_args(i)).c_str(), &terrainPtr->heights[i], 0.f, 1.f);
-      }
+    SliderInt("Count", &terrainPtr->layersCount, 0, TERRAIN_LAYERS);
+    bool needUpdate = false;
 
-      TreePop();
+    for (int i = 0; i < terrainPtr->layersCount; i++) {
+      TerrainLayer& tl = terrainPtr->layers[i];
+      Spacing();
+      needUpdate |= ColorEdit3 (std::vformat("Tint##{}"           , std::make_format_args(i)).c_str(), glm::value_ptr(tl.tint));
+      needUpdate |= SliderFloat(std::vformat("Tint strength##{}"  , std::make_format_args(i)).c_str(), &tl.tintStrength , 0.f, 1.f);
+      needUpdate |= SliderFloat(std::vformat("Start height##{}"   , std::make_format_args(i)).c_str(), &tl.startHeight  , 0.f, 1.f);
+      needUpdate |= SliderFloat(std::vformat("Blend strength ##{}", std::make_format_args(i)).c_str(), &tl.blendStrength, 0.f, 1.f);
+      needUpdate |= SliderFloat(std::vformat("Texture scale ##{}" , std::make_format_args(i)).c_str(), &tl.textureScale , 0.f, 1.f);
     }
+
+    if (needUpdate)
+      terrainPtr->updateLayers();
   }
 
   // ================== Character ====================== //
@@ -163,7 +173,7 @@ void gui::draw() {
     DragFloat3("Position", glm::value_ptr(lightPtr->position));
 
     Spacing();
-    Checkbox("drawEnvironmental light", &global::drawEnvironmentalLight);
+    Checkbox("Draw environmental light", &global::drawEnvironmentalLight);
 
     BeginDisabled(!global::drawEnvironmentalLight);
     ColorEdit3("Horizon", glm::value_ptr(lightPtr->skyHorizonColor));
