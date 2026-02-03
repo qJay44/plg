@@ -7,6 +7,21 @@
 #include <string>
 #include <vector>
 
+Texture Texture::debug0Tex;
+
+const Texture& Texture::getDegub0Tex() {
+  if (debug0Tex.desc.uniformName.empty())
+    debug0Tex = Texture(image2D("res/tex/debug/uvChecker.jpg"), {
+      .uniformName = "u_debug0Tex",
+      .unit = 0, // NOTE: Will be changed by other implemnetations
+      .minFilter = GL_NEAREST,
+      .magFilter = GL_NEAREST,
+      .genMipMap = false
+    });
+
+  return debug0Tex;
+}
+
 Texture::Texture(const fspath& path, const TextureDescriptor& d) : desc(d) {
   switch (desc.target) {
     case GL_TEXTURE_2D:
@@ -43,9 +58,13 @@ void Texture::update(u8* pixels, ivec2 size, GLenum format) {
   unbind();
 }
 
-void Texture::bind() const {
-  glActiveTexture(GL_TEXTURE0 + desc.unit);
+void Texture::bind(GLuint customUnit) const {
+  glActiveTexture(GL_TEXTURE0 + customUnit);
   glBindTexture(desc.target, id);
+}
+
+void Texture::bind() const {
+  bind(desc.unit);
 }
 
 void Texture::unbind() const {

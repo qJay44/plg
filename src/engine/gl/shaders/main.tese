@@ -46,7 +46,7 @@ void main() {
 
   float h = getHeight(chunkTexCoord);
   float hR = getHeight(chunkTexCoord + vec2(texelSize.x, 0.f));
-  float hT = getHeight(chunkTexCoord + vec2(0.f, texelSize.y));
+  float hT = getHeight(chunkTexCoord - vec2(0.f, texelSize.y));
 
   vertPos.y += h;
 

@@ -5,6 +5,8 @@
 
 class Texture {
 public:
+  static const Texture& getDegub0Tex();
+
   Texture() = default;
 
   Texture(const fspath& path, const TextureDescriptor& desc);
@@ -15,6 +17,7 @@ public:
   void operator=(const Texture& other);
 
   void update(u8* pixels, ivec2 size, GLenum format);
+  void bind(GLuint customUnit) const;
   void bind() const;
   void unbind() const;
   void clear();
@@ -29,6 +32,8 @@ public:
   void setUniformName(const std::string& name);
 
 private:
+  static Texture debug0Tex;
+
   TextureDescriptor desc{};
   GLuint id = 0;
 

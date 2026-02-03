@@ -204,6 +204,12 @@ void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) 
 }
 
 void Terrain::drawWater(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
+  // Endless-like water (the water connects properly on terrain rebuild)
+  vec2 offset = vec2(chunkMiddleCoord);
+  offset /= static_cast<float>(chunksPerAxis);
+  offset.y *= -1.f;
+
+  shader.setUniform2f("u_offset", offset);
   water.draw(camera, shader, forceNoWireframe);
 }
 

@@ -125,6 +125,9 @@ int main() {
   terrain.loadLayers("0.json");
 
   const TerrainWater& terrainWater = terrain.getWater();
+  const float& waterHeight = terrainWater.getHeight();
+  const ivec2& waterReflRes = terrainWater.getReflRes();
+  const ivec2& waterRefrRes = terrainWater.getRefrRes();
 
   // ===== Framebuffers ========================================= //
 
@@ -133,21 +136,24 @@ int main() {
   fboTexDesc.unit = 3;
   fboTexDesc.internalFormat = GL_DEPTH_COMPONENT24;
   fboTexDesc.format = GL_DEPTH_COMPONENT;
+  fboTexDesc.minFilter = GL_NEAREST;
+  fboTexDesc.magFilter = GL_NEAREST;
+  fboTexDesc.genMipMap = false;
 
-  Texture reflDepthTex({winSize.x, winSize.y}, fboTexDesc);
+  Texture reflDepthTex({waterReflRes.x, waterReflRes.y}, fboTexDesc);
 
   fboTexDesc.uniformName = "u_refractionDepthTex";
   fboTexDesc.unit = 4;
-  Texture refrDepthTex({winSize.x, winSize.y}, fboTexDesc);
+  Texture refrDepthTex({waterRefrRes.x, waterRefrRes.y}, fboTexDesc);
 
   FBO fboReflection{};
   FBO fboRefraction{};
-  RBO rbo{};
+  // RBO rbo{};
   fboReflection.attach2D(GL_COLOR_ATTACHMENT0, terrainWater.getReflTex());
   fboReflection.attach2D(GL_DEPTH_ATTACHMENT, reflDepthTex);
-  fboReflection.bind();
-  rbo.storage(GL_DEPTH_COMPONENT, winSize);
-  fboReflection.unbind();
+  // fboReflection.bind();
+  // rbo.storage(GL_DEPTH_COMPONENT, terrainWater.getReflRes());
+  // fboReflection.unbind();
 
   fboRefraction.attach2D(GL_COLOR_ATTACHMENT0, terrainWater.getRefrTex());
   fboRefraction.attach2D(GL_DEPTH_ATTACHMENT, refrDepthTex);
@@ -203,9 +209,6 @@ int main() {
     character.update();
 
     constexpr vec3 flippedY{1.f, -1.f, 1.f};
-    static const float& waterHeight = terrainWater.getHeight();
-    static const ivec2& waterReflRes = terrainWater.getReflRes();
-    static const ivec2& waterRefrRes = terrainWater.getRefrRes();
 
     // NOTE: Don't use reference on these
     const vec3 camPos = camera->getPosition();
@@ -213,11 +216,10 @@ int main() {
     const vec3 camPosFlipped = camPos * flippedY + vec3{0.f, waterHeight * 2.f, 0.f};
 
     fboReflection.bind();
+    glViewport(0, 0, waterReflRes.x, waterReflRes.y);
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CLIP_DISTANCE0);
-    glEnable(GL_CLIP_DISTANCE0);
-    glViewport(0, 0, waterReflRes.x, waterReflRes.y);
 
     camera->setPosition(camPosFlipped);
     camera->setOrientation(camOrientation * flippedY);
@@ -239,17 +241,17 @@ int main() {
     // ===== Refractions scene ==================================== //
 
     fboRefraction.bind();
+    glViewport(0, 0, waterRefrRes.x, waterRefrRes.y);
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_CLIP_DISTANCE0);
-    glViewport(0, 0, waterRefrRes.x, waterRefrRes.y);
+    glEnable(GL_CLIP_DISTANCE0);
 
     camera->setPosition(camPos);
     camera->setOrientation(camOrientation);
     camera->update();
 
     // Cut evertything above water height
-    shaderMain.setUniform4f("u_clipPlane", vec4(0.f, 1.f, 0.f, -waterHeight));
+    shaderMain.setUniform4f("u_clipPlane", vec4(0.f, -1.f, 0.f, waterHeight));
 
     if (global::drawEnvironmentalLight)
       light.drawEnvironment(camera, shaderEnvironment);
@@ -260,20 +262,21 @@ int main() {
     // ===== Final scene ========================================== //
 
     FBO::unbind();
+    glViewport(0, 0, winSize.x, winSize.y);
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_CLIP_DISTANCE0);
-    glViewport(0, 0, winSize.x, winSize.y);
 
     if (global::drawEnvironmentalLight)
       light.drawEnvironment(camera, shaderEnvironment);
 
-    light.draw(camera, shaderLight);
     terrain.draw(camera, global::drawNormals ? shaderMainNormals : shaderMain);
 
     refrDepthTex.bind();
     terrain.drawWater(camera, shaderWater);
     refrDepthTex.unbind();
+
+    light.draw(camera, shaderLight);
 
     if (global::drawGlobalAxis)
       axis.draw(camera, shaderColorPC);

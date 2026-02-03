@@ -19,7 +19,7 @@ TerrainWater::TerrainWater(
     reflRes(reflRes),
     refrRes(refrRes)
 {
-  if (dudvMapTex.getUniformName() == "-1") {
+  if (dudvMapTex.getUniformName().empty()) {
     TextureDescriptor desc;
     desc.uniformName = "u_dudvMapTex";
     desc.unit = 2;
@@ -30,12 +30,12 @@ TerrainWater::TerrainWater(
     desc.wrapT = GL_REPEAT;
     desc.genMipMap = false;
 
-    dudvMapTex = Texture(image2D("res/tex/water/waterDUDV.png"), desc);
+    dudvMapTex = Texture(image2D("res/tex/water/dudv.png"), desc);
 
     desc.uniformName = "u_normalMapTex";
     desc.unit = 5;
     desc.internalFormat = GL_RGB;
-    normalMapTex = Texture(image2D("res/tex/water/normalMap.png"), desc);
+    normalMapTex = Texture(image2D("res/tex/water/normal.png"), desc);
   }
 
   TextureDescriptor desc;
@@ -68,6 +68,9 @@ void TerrainWater::draw(const Camera* camera, Shader& shader, bool forceNoWirefr
   shader.setUniform1f("u_waveStrength", waveStrength);
   shader.setUniform1f("u_waveFreq", waveFreq);
   shader.setUniform1f("u_shoreFadeDist", shoreFadeDist);
+  shader.setUniform1f("u_tiling", tiling);
+  shader.setUniform1f("u_specularDamper", specularDamper);
+  shader.setUniform1f("u_specularStrength", specularStrength);
 
   reflectionTex.bind();
   refractionTex.bind();
@@ -75,7 +78,12 @@ void TerrainWater::draw(const Camera* camera, Shader& shader, bool forceNoWirefr
   normalMapTex.bind();
 
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   Mesh::draw(camera, shader, forceNoWireframe);
+
+  glDisable(GL_BLEND);
   glDisable(GL_DEPTH_TEST);
 
   reflectionTex.unbind();

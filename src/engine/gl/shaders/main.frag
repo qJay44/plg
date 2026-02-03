@@ -32,8 +32,6 @@ uniform vec3 u_lightColor;
 uniform vec3 u_camPos;
 uniform vec3 u_camForward;
 uniform float u_useLighting;
-uniform float u_sunFocus;
-uniform float u_sunIntensity;
 uniform float u_maskDebugColors;
 uniform float u_maskNormalmap;
 uniform float u_minHeight;
@@ -41,7 +39,10 @@ uniform float u_maxHeight;
 uniform int u_terrainLayersCount;
 
 vec3 directionalLight() {
-  vec3 lightDir = normalize(u_lightPos - dataIn.vertPos.xyz);
+  vec3 lightDistVec = u_lightPos - dataIn.vertPos.xyz;
+  float lightDist = length(lightDistVec);
+
+  vec3 lightDir = normalize(lightDistVec);
   vec3 viewDir = normalize(u_camPos - dataIn.vertPos.xyz);
   vec3 reflectDir = reflect(-lightDir, dataIn.chunkNormal);
 
@@ -51,7 +52,10 @@ vec3 directionalLight() {
   float specAmount = pow(max(dot(viewDir, reflectDir), 0.f), 8);
   float specular = specAmount * specularLight;
 
-  return u_lightColor * (diffuse + ambient + specular);
+  float lightAmount = (diffuse + specular) + ambient;
+  float intensity = smoothstep(1000.f, 0.f, lightDist);
+
+  return u_lightColor * lightAmount * intensity;
 }
 
 float inverseLerp(float a, float b, float n) {

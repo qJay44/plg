@@ -103,10 +103,11 @@ void gui::draw() {
     Checkbox("Auto chunk size", &terrainPtr->autoChunkSize);
     SetItemTooltip("Will be half of the noise texture width");
 
+    // ++++++++++++++++++ Chunks +++++++++++++++++++++++++ //
+
     SeparatorText("Chunks");
 
-    ivec2 coord = glm::floor(vec2(camera->position.x, camera->position.z) / terrainPtr->chunkSize);
-    Text("Chunk00 coord {%d, %d}", coord.x, coord.y);
+    Text("Coord [%d, %d]", terrainPtr->chunkMiddleCoord.x, terrainPtr->chunkMiddleCoord.y);
 
     BeginDisabled(terrainPtr->autoChunkSize);
     reGenTex |= SliderFloat("Size", &terrainPtr->chunkSize, 1.f, 512.f);
@@ -115,11 +116,16 @@ void gui::draw() {
     reGenTex |= SliderInt("Amount per axis", &terrainPtr->chunksPerAxis, 1, TERRAIN_MAX_CHUNKS_PER_AXIS);
     reGenTex |= SliderInt("Resolution", &terrainPtr->chunkResolution, 2, 20);
 
+    // ++++++++++++++++++ Water ++++++++++++++++++++++++++ //
+
     SeparatorText("Water");
     SliderFloat("Height##2", &terrainPtr->water.heightNorm, 0.f, 1.f);
     SliderFloat("Wave strength", &terrainPtr->water.waveStrength, 0.f, 1.f);
     SliderFloat("Wave frequency", &terrainPtr->water.waveFreq, 0.f, 1.f);
     SliderFloat("Shore fade distance", &terrainPtr->water.shoreFadeDist, 1.f, 30.f);
+    SliderFloat("Tiling", &terrainPtr->water.tiling, 1.f, 30.f);
+    SliderFloat("Specular damper", &terrainPtr->water.specularDamper, 0.f, 5.f);
+    SliderFloat("Specular strength", &terrainPtr->water.specularStrength, 0.f, 5.f);
   }
 
   // ================== Layers ========================= //
