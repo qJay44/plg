@@ -6,10 +6,17 @@
 #include "MapGenerator.hpp"
 #include "TerrainChunk.hpp"
 #include "TerrainLayer.hpp"
+#include "TerrainWater.hpp"
 
 class Terrain {
 public:
-  Terrain(vec3 pos, const std::string& layersName, const TextureDescriptor& desc);
+  Terrain(
+    vec3 pos,
+    const std::string& layersName,
+    const TextureDescriptor& desc,
+    ivec2 waterReflRes = global::getWinSize(),
+    ivec2 waterRefrRes = global::getWinSize()
+  );
 
   void updateLayers();
   void update(const vec3& pos, bool force = false);
@@ -17,9 +24,15 @@ public:
   void loadLayers(std::string_view name);
   void saveLayers(std::string_view name) const;
 
+  float calcHeight(float val) const;
   float getHeightAt(const vec3& pos);
+  float getSize() const;
+  vec3 getMiddlePos() const;
+
+  const TerrainWater& getWater() const;
 
   void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
+  void drawWater(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
 
 private:
   friend struct gui;
@@ -43,6 +56,8 @@ private:
   std::array<TerrainLayer, TERRAIN_MAX_LAYERS> layers;
   BufferObject ubo{GL_UNIFORM_BUFFER};
 
+  TerrainWater water{this, 0.5f, {800, 800}, {1200, 720}};
+
   BufferObject pbos[2]{GL_PIXEL_PACK_BUFFER, GL_PIXEL_PACK_BUFFER};
   bool readIdx = false; // 0
   bool writeIdx = true; // 1
@@ -56,6 +71,5 @@ private:
 
 private:
   void build(ivec2 middleCoord);
-  float calcHeight(float val) const;
 };
 

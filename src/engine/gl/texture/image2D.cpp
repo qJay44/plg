@@ -15,7 +15,7 @@ void image2D::write(const std::string& path, uvec2 size, u8 channels, byte* buf)
   stbi_write_png(path.c_str(), size.x, size.y, channels, buf, size.x * channels);
 }
 
-image2D::image2D() {}
+image2D::image2D(int width, int height) : width(width), height(height) {}
 
 image2D::image2D(const fspath& path, bool flipVertically) { load(path, flipVertically); }
 

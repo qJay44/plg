@@ -20,6 +20,7 @@ public:
 
   virtual void setSpeedDefault(float n);
   virtual void setSpeedMultiplier(float n);
+  virtual void setOrientation(const vec3& o);
   virtual void setPosition(const vec3& pos);
   virtual void setView(const Moveable* rhs);
 

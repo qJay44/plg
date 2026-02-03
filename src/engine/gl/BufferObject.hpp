@@ -4,13 +4,12 @@
 #include <cstring>
 #include <span>
 
-#include "texture/Texture.hpp"
-
 // VBO - GL_ARRAY_BUFFER
 // EBO - GL_ELEMENT_ARRAY_BUFFER
 // UBO - GL_UNIFORM_BUFFER
 // PBO - GL_PIXEL_PACK_BUFFER
-// FBO - GL_FRAMEBUFFER
+// FBO - X
+// RBO - X
 
 struct BufferObject {
 public:
@@ -54,12 +53,6 @@ public:
   void update(std::ranges::contiguous_range auto const& container, GLbitfield access) const {
     auto s = std::span(container);
     update(s.data(), s.size_bytes(), access);
-  }
-
-  void attach2D(GLenum attachment, const Texture& tex) const {
-    bind();
-    glFramebufferTexture2D(target, attachment, tex.getTarget(), tex.getId(), 0);
-    unbind();
   }
 
   void unbind() const {

@@ -4,7 +4,6 @@
 #include "Moveable.hpp"
 #include "gl/Shader.hpp"
 #include "gl/mesh/Mesh.hpp"
-#include "gl/mesh/VAO.hpp"
 #include "gl/mesh/meshes.hpp"
 #include "../global.hpp"
 
@@ -25,9 +24,6 @@ public:
   }
 
   void drawEnvironment(const Camera* camera, Shader& shader) const {
-    static const VAO vao;
-
-    shader.use();
     shader.setUniform3f("u_lightPos", position);
     shader.setUniform3f("u_skyHorizonColor", skyHorizonColor);
     shader.setUniform3f("u_skyZenithColor", skyZenithColor);
@@ -35,9 +31,9 @@ public:
     shader.setUniform3f("u_camPos", camera->getPosition());
     shader.setUniformMatrix4f("u_camInv", camera->getProjViewInv());
 
-    vao.bind();
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    vao.unbind();
+    glDisable(GL_DEPTH_TEST);
+    Mesh::screenDraw(camera, shader);
+    glEnable(GL_DEPTH_TEST);
   }
 
   void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const {
@@ -49,7 +45,7 @@ public:
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Mesh::draw(camera, shader);
+    Mesh::draw(camera, shader, forceNoWireframe);
 
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);

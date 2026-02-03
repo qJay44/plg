@@ -16,6 +16,7 @@ layout(binding = 2) uniform sampler2D u_noiseTex;
 
 uniform vec2 u_chunks;
 uniform vec2 u_chunkOffset;
+uniform vec4 u_clipPlane;
 uniform mat4 u_camPV;
 uniform float u_heightMultiplier;
 uniform float u_maskFalloffmap;
@@ -59,6 +60,7 @@ void main() {
   dataOut.chunkTexCoord = chunkTexCoord;
   dataOut.chunkNormal   = chunkNormal;
 
+  gl_ClipDistance[0] = dot(vertPos, u_clipPlane);
   gl_Position = u_camPV * vertPos;
 }
 

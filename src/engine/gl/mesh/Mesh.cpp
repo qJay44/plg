@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "../../../global.hpp"
+#include "VAO.hpp"
 
 Mesh::Mesh(const std::vector<Vertex4>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool autoClear)
   : count(indices.size()),
@@ -79,6 +80,15 @@ Mesh::~Mesh() {
   if (autoClear)
     clear();
 };
+
+void Mesh::screenDraw(const Camera* camera, Shader& shader) {
+  static const VAO vao;
+  shader.use();
+
+  vao.bind();
+  glDrawArrays(GL_TRIANGLES, 0, 6);
+  vao.unbind();
+}
 
 void Mesh::clear() {
   vao.clear();

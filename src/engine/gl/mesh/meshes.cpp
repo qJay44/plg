@@ -137,14 +137,14 @@ Mesh cube(vec3 color, GLenum mode, bool autoClear) {
   return Mesh(vertices, indices, mode, autoClear);
 }
 
-Mesh axis(float size, bool autoClear) {
+Mesh axis(bool autoClear) {
   std::vector<VertexPC> vertices{
-    {{0.f, 0.f, 0.f} , global::red},
-    {{size, 0.f, 0.f}, global::red},
-    {{0.f, 0.f, 0.f} , global::green},
-    {{0.f, size, 0.f}, global::green},
-    {{0.f, 0.f, 0.f} , global::blue},
-    {{0.f, 0.f, size}, global::blue},
+    {{0.f, 0.f, 0.f}, global::red},
+    {{1.f, 0.f, 0.f}, global::red},
+    {{0.f, 0.f, 0.f}, global::green},
+    {{0.f, 1.f, 0.f}, global::green},
+    {{0.f, 0.f, 0.f}, global::blue},
+    {{0.f, 0.f, 1.f}, global::blue},
   };
 
   std::vector<GLuint> indices {

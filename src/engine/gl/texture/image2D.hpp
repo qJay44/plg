@@ -3,7 +3,8 @@
 struct image2D {
   static void write(const std::string& path, uvec2 size, u8 channels, byte* buf);
 
-  image2D();
+  image2D() = default;
+  image2D(int width, int height);
   image2D(const fspath& path, bool flipVertically = false);
   ~image2D();
 

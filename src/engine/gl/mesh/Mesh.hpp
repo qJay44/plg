@@ -16,6 +16,8 @@ public:
   Mesh(const std::vector<VertexPC>& vertices, const std::vector<GLuint>& indices, GLenum mode, bool clearable);
   ~Mesh();
 
+  static void screenDraw(const Camera* camera, Shader& shader);
+
   void clear();
   void draw(const Camera* camera, Shader& shader, bool forceNoWireframe = false) const;
 

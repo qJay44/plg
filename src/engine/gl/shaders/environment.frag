@@ -2,6 +2,8 @@
 
 out vec4 FragColor;
 
+in vec2 texCoord;
+
 uniform vec3 u_camPos;
 uniform vec3 u_lightPos;
 uniform vec3 u_skyHorizonColor;
@@ -10,8 +12,7 @@ uniform vec3 u_groundColor;
 uniform mat4 u_camInv;
 
 void main() {
-  vec2 uv = vec2(gl_FragCoord.xy) / vec2(1200, 720);
-  vec2 ndc = uv * 2.f - 1.f;
+  vec2 ndc = texCoord * 2.f - 1.f;
   vec4 clipPos = vec4(ndc, -1.f, 1.f);
   vec4 worldPos = u_camInv * clipPos;
   worldPos /= worldPos.w;

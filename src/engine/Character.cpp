@@ -33,7 +33,7 @@ void Character::update() {
   float terrainHeight = terrain->getHeightAt(position);
   float nextHeight = position.y - terrainHeight;
 
-  if (nextHeight < 0.f) {
+  if (nextHeight < 0.f && !flyMode) {
     position.y = terrainHeight;
     velocity.y = 0.f;
   }

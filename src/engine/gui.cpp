@@ -85,8 +85,8 @@ void gui::draw() {
 
     mg.noiseTex.bind();
     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
-    Image(mg.noiseTex.getId(), vec2(mg.size) * imgScale);
     mg.noiseTex.unbind();
+    Image(mg.noiseTex.getId(), vec2(mg.size) * imgScale);
   }
 
   // ================== Terrain ======================== //
@@ -103,15 +103,23 @@ void gui::draw() {
     Checkbox("Auto chunk size", &terrainPtr->autoChunkSize);
     SetItemTooltip("Will be half of the noise texture width");
 
+    SeparatorText("Chunks");
+
     ivec2 coord = glm::floor(vec2(camera->position.x, camera->position.z) / terrainPtr->chunkSize);
     Text("Chunk00 coord {%d, %d}", coord.x, coord.y);
 
     BeginDisabled(terrainPtr->autoChunkSize);
-    reGenTex |= SliderFloat("Chunk size", &terrainPtr->chunkSize, 1.f, 512.f);
+    reGenTex |= SliderFloat("Size", &terrainPtr->chunkSize, 1.f, 512.f);
     EndDisabled();
 
-    reGenTex |= SliderInt("Chunks per axis", &terrainPtr->chunksPerAxis, 1, TERRAIN_MAX_CHUNKS_PER_AXIS);
-    reGenTex |= SliderInt("Chunk resolution", &terrainPtr->chunkResolution, 2, 20);
+    reGenTex |= SliderInt("Amount per axis", &terrainPtr->chunksPerAxis, 1, TERRAIN_MAX_CHUNKS_PER_AXIS);
+    reGenTex |= SliderInt("Resolution", &terrainPtr->chunkResolution, 2, 20);
+
+    SeparatorText("Water");
+    SliderFloat("Height##2", &terrainPtr->water.heightNorm, 0.f, 1.f);
+    SliderFloat("Wave strength", &terrainPtr->water.waveStrength, 0.f, 1.f);
+    SliderFloat("Wave frequency", &terrainPtr->water.waveFreq, 0.f, 1.f);
+    SliderFloat("Shore fade distance", &terrainPtr->water.shoreFadeDist, 1.f, 30.f);
   }
 
   // ================== Layers ========================= //
@@ -197,8 +205,8 @@ void gui::draw() {
 
     mg.falloffTex.bind();
     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
-    Image(mg.falloffTex.getId(), vec2(mg.size) * imgScale);
     mg.falloffTex.unbind();
+    Image(mg.falloffTex.getId(), vec2(mg.size) * imgScale);
 
     EndDisabled();
   }

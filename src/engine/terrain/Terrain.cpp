@@ -9,13 +9,20 @@
 
 #include "MapGenerator.hpp"
 #include "../../colormaps/jet.hpp"
+#include "TerrainWater.hpp"
 #include "glm/common.hpp"
 #include "utils/utils.hpp"
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 
-Terrain::Terrain(vec3 pos, const std::string& layersName, const TextureDescriptor& desc) : layersName(layersName) {
+Terrain::Terrain(
+  vec3 pos,
+  const std::string& layersName,
+  const TextureDescriptor& desc,
+  ivec2 waterReflRes,
+  ivec2 waterRefrRes
+) : layersName(layersName), water(this, 0.5f, waterReflRes, waterRefrRes) {
   ubo.allocate(layers, GL_DYNAMIC_DRAW);
 
   size_t dataSize = sharedMapGen.size.x * sharedMapGen.size.y * sizeof(float);
@@ -47,6 +54,8 @@ void Terrain::update(const vec3& pos, bool force) {
     sharedMapGen.gen();
     build(currChunkMiddleCoord);
   }
+
+  water.update();
 }
 
 void Terrain::loadLayers(std::string_view name) {
@@ -136,6 +145,22 @@ float Terrain::getHeightAt(const vec3& pos) {
   writeIdx = !writeIdx;
 
   return height;
+};
+
+float Terrain::getSize() const {
+  return chunkSize * chunksPerAxis;
+}
+
+vec3 Terrain::getMiddlePos() const {
+  vec3 pos{};
+  pos.x = chunkMiddleCoord.x * chunkSize + chunkSize * 0.5f;
+  pos.z = chunkMiddleCoord.y * chunkSize + chunkSize * 0.5f;
+
+  return pos;
+}
+
+const TerrainWater& Terrain::getWater() const {
+  return water;
 }
 
 void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
@@ -157,6 +182,8 @@ void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) 
 
   vec2 chunkOffsetStep(1.f / chunksPerAxis);
 
+  glEnable(GL_DEPTH_TEST);
+
   for (int i = 0; i < chunksPerAxis; i++) {
     for (int j = 0; j < chunksPerAxis; j++) {
       int idx = j + i * chunksPerAxis;
@@ -169,9 +196,15 @@ void Terrain::draw(const Camera* camera, Shader& shader, bool forceNoWireframe) 
     }
   }
 
+  glDisable(GL_DEPTH_TEST);
+
   layersTexture.unbind();
   sharedMapGen.falloffTex.unbind();
   sharedMapGen.noiseTex.unbind();
+}
+
+void Terrain::drawWater(const Camera* camera, Shader& shader, bool forceNoWireframe) const {
+  water.draw(camera, shader, forceNoWireframe);
 }
 
 void Terrain::build(ivec2 middleCoord) {

@@ -9,6 +9,7 @@ uniform mat4 u_model;
 
 void main() {
   uvs = inTex;
-  gl_Position = u_model * vec4(inPos, 1.f);
+  vec4 worldPos = u_model * vec4(inPos, 1.f);
+  gl_Position = worldPos;
 }
 

@@ -22,6 +22,7 @@ vec3 Moveable::getDown()    const { return -getUp();};
 
 void Moveable::setSpeedDefault(float n)      { speedDefault = n; speed = speedDefault * speedMul; }
 void Moveable::setSpeedMultiplier(float n)   { speedMul     = n; speed = speedDefault * speedMul; }
+void Moveable::setOrientation(const vec3& o) { orientation = o;}
 void Moveable::setPosition(const vec3& pos)  { position = pos; }
 
 void Moveable::setView(const Moveable* rhs) {
