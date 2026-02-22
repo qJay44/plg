@@ -5,7 +5,6 @@ out vec4 FragColor;
 in vec4 worldPos;
 in vec4 clipSpace;
 in vec2 texCoord;
-// in vec3 viewDir;
 in vec3 toLightDir;
 
 layout(binding = 0) uniform sampler2D u_reflectionTex;
@@ -23,7 +22,6 @@ uniform float u_camFar;
 uniform float u_time;
 uniform float u_waveStrength;
 uniform float u_waveFreq;
-uniform float u_shoreFadeDist;
 uniform float u_specularDamper;
 uniform float u_specularStrength;
 
@@ -74,7 +72,7 @@ void main() {
 
   float fresnel = dot(viewDir, waterNormal);
   vec3 col = mix(reflCol, refrCol, pow(fresnel, 0.5f));
-  col += specularLight(viewDir, waterNormal, toLightDir) * clamp(waterDepth * 0.2f, 0.f, 1.f);
+  col += specularLight(viewDir, toLightDir, waterNormal) * clamp(waterDepth * 0.2f, 0.f, 1.f);
 
   float alpha = clamp(waterDepth * 0.1f, 0.f, 1.f);
 

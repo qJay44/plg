@@ -60,7 +60,6 @@ target_precompile_headers(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src/pch.h
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${GLAD_PATH}/include
-  ${GLFW_INCLUDE_DIRS}
   ${GLM_PATH}/include
   ${STB_PATH}/include
   ${IMGUI_PATH}
@@ -76,5 +75,5 @@ target_link_directories(${PROJECT_NAME} PUBLIC
   ${GLAD_PATH}/build
 )
 
-target_link_libraries(${PROJECT_NAME} GLFW_IMGUI.so GLAD.so glfw)
+target_link_libraries(${PROJECT_NAME} GLFW_IMGUI GLAD glfw)
 

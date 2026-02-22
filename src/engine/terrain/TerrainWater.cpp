@@ -67,7 +67,6 @@ void TerrainWater::draw(const Camera* camera, Shader& shader, bool forceNoWirefr
   shader.setUniform1f("u_time", global::time);
   shader.setUniform1f("u_waveStrength", waveStrength);
   shader.setUniform1f("u_waveFreq", waveFreq);
-  shader.setUniform1f("u_shoreFadeDist", shoreFadeDist);
   shader.setUniform1f("u_tiling", tiling);
   shader.setUniform1f("u_specularDamper", specularDamper);
   shader.setUniform1f("u_specularStrength", specularStrength);

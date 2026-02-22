@@ -37,7 +37,6 @@ private:
   float height;
   float waveStrength = 0.3f;
   float waveFreq = 0.02f;
-  float shoreFadeDist = 5.f;
   float tiling = 4.f;
   float specularDamper = 5.f;
   float specularStrength = 0.7f;

@@ -122,7 +122,6 @@ void gui::draw() {
     SliderFloat("Height##2", &terrainPtr->water.heightNorm, 0.f, 1.f);
     SliderFloat("Wave strength", &terrainPtr->water.waveStrength, 0.f, 1.f);
     SliderFloat("Wave frequency", &terrainPtr->water.waveFreq, 0.f, 1.f);
-    SliderFloat("Shore fade distance", &terrainPtr->water.shoreFadeDist, 1.f, 30.f);
     SliderFloat("Tiling", &terrainPtr->water.tiling, 1.f, 30.f);
     SliderFloat("Specular damper", &terrainPtr->water.specularDamper, 0.f, 5.f);
     SliderFloat("Specular strength", &terrainPtr->water.specularStrength, 0.f, 5.f);
