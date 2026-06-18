@@ -12,9 +12,13 @@ public:
   Texture(const fspath& path, const TextureDescriptor& desc);
   Texture(const image2D& img, const TextureDescriptor& desc);
 
-  Texture(const Texture& other);
+  Texture(Texture&& other);
+  void operator=(Texture&& other);
 
-  void operator=(const Texture& other);
+  Texture(const Texture&) = delete;
+  void operator=(const Texture&) = delete;
+
+  ~Texture();
 
   void update(u8* pixels, ivec2 size, GLenum format);
   void bind(GLuint customUnit) const;

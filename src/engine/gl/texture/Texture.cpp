@@ -43,13 +43,20 @@ Texture::Texture(const image2D& img, const TextureDescriptor& d) : desc(d) {
   create2D(img);
 }
 
-Texture::Texture(const Texture& other) :
+Texture::Texture(Texture&& other) :
   desc(other.desc),
-  id(other.id) {}
+  id(other.id) {
+  other.id = 0;
+}
 
-void Texture::operator=(const Texture& other) {
+void Texture::operator=(Texture&& other) {
   desc = other.desc;
   id = other.id;
+  other.id = 0;
+}
+
+Texture::~Texture() {
+  clear();
 }
 
 void Texture::update(u8* pixels, ivec2 size, GLenum format) {

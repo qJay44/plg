@@ -26,10 +26,8 @@ void MapGenerator::gen() {
 
   desc.uniformName = "u_falloffTex";
   desc.unit = 1;
-  falloffTex.clear();
   falloffTex = Texture(mapImg, desc);
 
-  noiseTex.clear();
   desc.uniformName = "u_noiseTex";
   desc.unit = 2;
   noiseTex = Texture(mapImg, desc);
@@ -57,10 +55,5 @@ void MapGenerator::gen() {
   glBindImageTexture(1, noiseTex.getId(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R8);
   glDispatchCompute(numGroups.x, numGroups.y, 1);
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-}
-
-void MapGenerator::clear() {
-  falloffTex.clear();
-  noiseTex.clear();
 }
 

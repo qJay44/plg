@@ -26,6 +26,8 @@ void gui::draw() {
   });
   SetNextWindowCollapsed(collapsed);
 
+  vec2 winCenter = global::getWinCenter();
+
   Begin("Settings");
 
   ImGui::Text("FPS: %d / %f.5 ms", fps, global::dt);
@@ -56,7 +58,6 @@ void gui::draw() {
   bool reGenTex = false;
 
   if (CollapsingHeader("Noise texture")) {
-    static float imgScale = 0.5f;
     static bool sq = true;
 
     reGenTex |= Checkbox("Width = Height", &sq);
@@ -81,12 +82,11 @@ void gui::draw() {
     reGenTex |= DragFloat2("Offset", glm::value_ptr(terrainPtr->offset), 0.1f);
 
     Spacing();
-    SliderFloat("Image scale", &imgScale, 0.01f, 1.f);
 
     mg.noiseTex.bind();
     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
     mg.noiseTex.unbind();
-    Image(mg.noiseTex.getId(), vec2(mg.size) * imgScale);
+    Image(mg.noiseTex.getId(), winCenter * 0.5f);
   }
 
   // ================== Terrain ======================== //
@@ -199,19 +199,16 @@ void gui::draw() {
   // ================== Falloff ======================== //
 
   if (CollapsingHeader("Falloff")) {
-    static float imgScale = 0.5f;
-
     reGenTex |= Checkbox("Enable", &terrainPtr->useFalloffmap);
 
     BeginDisabled(!terrainPtr->useFalloffmap);
     reGenTex |= SliderFloat("Parameter a", &mg.falloffA, 0.01f, 20.f);
     reGenTex |= SliderFloat("Parameter b", &mg.falloffB, 0.01f, 20.f);
-    SliderFloat("Image scale##2", &imgScale, 0.01f, 1.f);
 
     mg.falloffTex.bind();
     glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle);
     mg.falloffTex.unbind();
-    Image(mg.falloffTex.getId(), vec2(mg.size) * imgScale);
+    Image(mg.falloffTex.getId(), winCenter * 0.5f);
 
     EndDisabled();
   }

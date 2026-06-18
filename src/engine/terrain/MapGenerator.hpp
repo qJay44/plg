@@ -22,6 +22,5 @@ struct MapGenerator {
   MapGenerator(vec2 offset);
 
   void gen();
-  void clear();
 };
 
